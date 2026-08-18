@@ -40,7 +40,7 @@ export function AddIframeModal({ isOpen, onClose, onSubmit }: AddIframeModalProp
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog" aria-modal="true">
       <div className="w-full max-w-md mx-4 p-6 bg-white rounded-lg shadow-xl">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Add Iframe</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Add Page</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700" aria-label="Close">
             ×
           </button>
@@ -74,7 +74,7 @@ export function AddIframeModal({ isOpen, onClose, onSubmit }: AddIframeModalProp
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">Add Iframe</Button>
+            <Button type="submit">Add Page</Button>
           </div>
         </form>
       </div>

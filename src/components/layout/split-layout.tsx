@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { Panel } from './panel';
+import { AddIframeButton } from '../side-panel/add-iframe-button';
 import { iframeLayoutStore } from '@/stores';
 import type { AppMode } from '@/types/layout';
 
@@ -22,8 +23,8 @@ export const SplitLayout = observer(({ orientation = 'horizontal' }: SplitLayout
 
   if (orderedIframes.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500">
-        No iframes to display. Add one using the toolbar.
+      <div className="flex items-center justify-center h-full">
+        <AddIframeButton onClick={() => iframeLayoutStore.openAddIframeModal()} />
       </div>
     );
   }

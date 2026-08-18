@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 
 import { HoverZone } from './components/hover-zone';
@@ -12,10 +12,11 @@ import { iframeLayoutStore } from './stores';
 
 
 export const App = observer(() => {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
   useEffect(() => {
     iframeLayoutStore.loadFromStorage();
+    return () => {
+      iframeLayoutStore.dispose();
+    };
   }, []);
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export const App = observer(() => {
         onClose={() => iframeLayoutStore.closeSidePanel()}
         currentMode={iframeLayoutStore.currentMode}
         onModeChange={(mode) => iframeLayoutStore.switchLayout(mode)}
-        onAddIframe={() => setIsAddModalOpen(true)}
+        onAddIframe={() => iframeLayoutStore.openAddIframeModal()}
       />
 
       <main className="flex-1 p-2 overflow-auto">
@@ -73,8 +74,8 @@ export const App = observer(() => {
       </main>
 
       <AddIframeModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        isOpen={iframeLayoutStore.addIframeModalOpen}
+        onClose={() => iframeLayoutStore.closeAddIframeModal()}
         onSubmit={handleAddIframe}
       />
 

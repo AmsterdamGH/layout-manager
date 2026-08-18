@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { X, Pencil, Save } from 'lucide-react';
 import { LayoutSwitcher } from '../layout/layout-switcher';
-import { AddIframeButton } from '../toolbar/add-iframe-button';
+import { AddIframeButton } from './add-iframe-button';
+import { EditPresetModal } from '../modals/edit-preset-modal';
+import { PresetSelector } from './preset-selector';
 import { iframeLayoutStore } from '@/stores';
-import type { LayoutMode, AppMode } from '@/types/layout';
+import type { LayoutMode, AppMode, PresetModalMode } from '@/types/layout';
 
 interface SidePanelProps {
   isOpen: boolean;
@@ -20,6 +23,9 @@ export const SidePanel = observer(({
   onModeChange,
   onAddIframe,
 }: SidePanelProps) => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editPresetName, setEditPresetName] = useState('');
+  const [modalMode, setModalMode] = useState<PresetModalMode>('create');
   const appMode: AppMode = iframeLayoutStore.appMode;
   const handlePanelMouseEnter = () => {
     iframeLayoutStore.setHoveringLeftEdge(true);
@@ -27,6 +33,25 @@ export const SidePanel = observer(({
 
   const handlePanelMouseLeave = () => {
     iframeLayoutStore.setHoveringLeftEdge(false);
+  };
+
+  const handleEditSubmit = (name: string) => {
+    if (name.trim()) {
+      if (modalMode === 'edit' && iframeLayoutStore.currentPresetId) {
+        iframeLayoutStore.editPresetName(iframeLayoutStore.currentPresetId!, name.trim());
+      } else if (modalMode === 'clone' && iframeLayoutStore.currentPresetId) {
+        iframeLayoutStore.clonePreset(iframeLayoutStore.currentPresetId!, name.trim());
+      } else if (modalMode === 'create') {
+        iframeLayoutStore.createPreset(name.trim(), {
+          mode: 'layout-grid',
+          iframes: [],
+          order: [],
+          panelSizes: {},
+        });
+      }
+      setIsEditModalOpen(false);
+      setEditPresetName('');
+    }
   };
 
   return (
@@ -60,6 +85,29 @@ export const SidePanel = observer(({
 
         {/* Content */}
         <div className="p-4 space-y-4">
+          {/* Presets */}
+          <PresetSelector
+            onClone={(presetId) => {
+              if (presetId) {
+                const preset = iframeLayoutStore.presetList.find((p) => p.id === presetId);
+                setEditPresetName(preset ? `${preset.name} (copy)` : 'Preset (copy)');
+                setModalMode('clone');
+                setIsEditModalOpen(true);
+              }
+            }}
+            onEdit={(presetId) => {
+              const preset = iframeLayoutStore.presetList.find((p) => p.id === presetId);
+              setEditPresetName(preset?.name || '');
+              setModalMode('edit');
+              setIsEditModalOpen(true);
+            }}
+            onCreate={() => {
+              setEditPresetName('');
+              setModalMode('create');
+              setIsEditModalOpen(true);
+            }}
+          />
+
           {/* Layout Mode */}
           <div className="space-y-2">
             <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -71,7 +119,7 @@ export const SidePanel = observer(({
             />
           </div>
 
-          {/* Add Iframe */}
+          {/* Add Page */}
           <div className="space-y-2">
             <AddIframeButton onClick={onAddIframe} />
           </div>
@@ -89,6 +137,13 @@ export const SidePanel = observer(({
           </button>
         </div>
       </aside>
+      <EditPresetModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSubmit={handleEditSubmit}
+        initialName={editPresetName}
+        mode={modalMode}
+      />
     </>
   );
 });

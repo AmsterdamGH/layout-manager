@@ -12,7 +12,7 @@ export function AddIframeButton({ onClick }: AddIframeButtonProps) {
       aria-label="Add new iframe"
     >
       <Plus className="w-4 h-4" />
-      <span className="text-sm font-medium">Add Iframe</span>
+      <span className="text-sm font-medium">Add Page</span>
     </button>
   );
 };

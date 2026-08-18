@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A React application for managing a dynamic layout of iframes with multiple layout modes, drag-and-drop reordering, and persistent state storage.
+A React application for managing a dynamic layout of iframes with multiple layout modes, drag-and-drop reordering, persistent state storage, and preset management with location hash support.
 
 ## Tech Stack
 
@@ -57,13 +57,13 @@ src/
 │   │   ├── split-layout.tsx
 │   │   └── panel.tsx
 │   ├── side-panel/
-│   │   └── side-panel.tsx
-│   ├── toolbar/
-│   │   ├── toolbar.tsx
+│   │   ├── side-panel.tsx
+│   │   ├── preset-selector.tsx
 │   │   └── add-iframe-button.tsx
 │   ├── modals/
 │   │   ├── add-iframe-modal.tsx
-│   │   └── edit-iframe-modal.tsx
+│   │   ├── edit-iframe-modal.tsx
+│   │   └── edit-preset-modal.tsx
 │   └── ui/
 │       ├── button.tsx
 │       ├── input.tsx
@@ -82,7 +82,8 @@ src/
 ├── utils/
 │   ├── storage.ts
 │   ├── validation.ts
-│   └── constants.ts
+│   ├── constants.ts
+│   └── hash.ts
 ├── app.tsx
 └── main.tsx
 ```
@@ -95,6 +96,7 @@ src/
 - Remove iframes
 - Toggle iframe visibility
 - Load iframe with loading/error states
+- AddIframeButton component used in layouts and side panel
 
 ### 2. Layout Modes
 - **Grid:** Equal-sized panels in a grid
@@ -113,6 +115,22 @@ src/
 - Debounced saves (500ms)
 - Error handling for localStorage
 
+### 5. Presets
+- Save multiple layout configurations (presets) with different iframes and modes
+- Switch between presets via dropdown selector (or listbox when ≤5 presets)
+- Clone presets with a new name
+- Edit preset names
+- Delete presets
+- Create new presets with empty layout
+- Presets stored in localStorage under key `'presets'`
+
+### 6. Location Hash Support
+- Current preset reflected in URL hash using preset name (e.g., `#preset=My-Preset`)
+- Hash updated when switching presets or creating new ones
+- Browser back/forward buttons work correctly
+- Hash validated on load - invalid presets are ignored
+- On first load with no hash, a default preset is created and hash is set
+
 ## Icons
 
 The application uses Lucide React icons for consistent iconography:
@@ -122,11 +140,13 @@ The application uses Lucide React icons for consistent iconography:
 | `Grid3x3` | Grid layout mode |
 | `Columns3` | Horizontal layout mode |
 | `Rows3` | Vertical layout mode |
-| `Plus` | Add iframe button |
+| `Plus` | Add page button (in layouts and side panel) |
 | `Pencil`, `Save` | Edit mode toggle |
 | `X` | Close buttons |
 | `Loader2` | Loading states |
 | `Grip`, `Pencil`, `Trash2` | Panel actions |
+| `Copy` | Clone preset button |
+| `ChevronDown` | Dropdown toggle |
 
 Icons are imported from `lucide-react` and used as React components with consistent sizing (`h-4 w-4`). Layout switcher buttons display only icons (no labels) centered in a row.
 
@@ -150,9 +170,20 @@ interface Iframe {
 ### Layout
 ```typescript
 interface Layout {
+  appMode: 'edit' | 'view';
+  preset: Preset;
+  presetId: string | null;
+}
+```
+
+### Preset
+```typescript
+interface Preset {
+  id: string;
+  name: string;
   mode: 'layout-grid' | 'layout-horizontal' | 'layout-vertical';
   iframes: Iframe[];
-  order: string[]; // iframe IDs in order
+  order: string[];
   panelSizes: Record<string, { width: number; height: number }>;
 }
 ```
@@ -162,18 +193,21 @@ interface Layout {
 ### iframe-layout-store
 ```typescript
 class IframeLayoutStore {
-  @observable layout: Layout = { mode: 'layout-grid', iframes: [], order: [], panelSizes: {} };
-  @observable isLoading: boolean = false;
-  @observable error: string | null = null;
-  @observable editingIframeId: string | null = null;
-  @observable draggedIframeId: string | null = null;
-  @observable dragOverIframeId: string | null = null;
+  preset: Preset = { id: 'default', name: 'Default', mode: 'layout-grid', iframes: [], order: [], panelSizes: {} };
+  layout: Layout = { appMode: 'edit', preset: this.preset, presetId: null };
+  presets: Map<string, Preset> = new Map();
+  isLoading: boolean = false;
+  error: string | null = null;
+  editingIframeId: string | null = null;
+  draggedIframeId: string | null = null;
+  dragOverIframeId: string | null = null;
+  isAddIframeModalOpen: boolean = false;
   
   // Actions
   @action addIframe(iframe: Iframe): void;
   @action removeIframe(id: string): void;
   @action updateIframe(id: string, updates: Partial<Iframe>): void;
-  @action switchLayout(mode: Layout['mode']): void;
+  @action switchLayout(mode: Preset['mode']): void;
   @action reorderIframes(order: string[]): void;
   @action editIframe(id: string): void;
   @action closeEditModal(): void;
@@ -184,6 +218,13 @@ class IframeLayoutStore {
   @action loadFromStorage(): void;
   @action saveToStorage(): void;
   @action clearStorage(): void;
+  @action createPreset(name: string, initialPreset?: Partial<Preset>): string;
+  @action switchPreset(presetId: string): void;
+  @action deletePreset(presetId: string): void;
+  @action clonePreset(sourceId: string, newName: string): string;
+  @action editPresetName(presetId: string, newName: string): void;
+  @action openAddIframeModal(): void;
+  @action closeAddIframeModal(): void;
 }
 ```
 
