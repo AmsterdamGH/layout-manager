@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Plus, Trash2, ChevronDown, Copy, Pencil } from 'lucide-react';
+import { Plus, ChevronDown } from 'lucide-react';
 import { iframeLayoutStore } from '@/stores';
+import { PresetActions } from './preset-actions';
 
 interface PresetSelectorProps {
   onClone: (presetId: string) => void;
@@ -29,21 +30,37 @@ export const PresetSelector = observer(({
 
   const handleCreatePreset = () => {
     onCreate();
+    setIsOpen(false);
   };
 
   const handleDeletePreset = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Delete this preset?')) {
       iframeLayoutStore.deletePreset(id);
+      setIsOpen(false);
     }
   };
 
   const handleSelect = (presetId: string) => {
     iframeLayoutStore.switchPreset(presetId);
-    if (!isListbox) {
-      setIsOpen(false);
-    }
+    setIsOpen(false);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isOpen && !e.target) return;
+      const target = e.target as HTMLElement;
+      const dropdown = document.querySelector('[data-dropdown="preset-selector"]');
+      if (dropdown && !dropdown.contains(target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen]);
 
   const renderPresetItem = (preset: typeof presets[0]) => (
     <div
@@ -59,27 +76,13 @@ export const PresetSelector = observer(({
     >
       <span className="truncate">{preset.name}</span>
       <div className="flex items-center gap-1">
-        <button
-          onClick={(e) => handleDeletePreset(preset.id, e)}
-          className="p-1 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50 rounded-md transition-colors"
-          aria-label={`Delete ${preset.name}`}
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => handleClonePreset(preset.id)}
-          className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
-          aria-label={`Clone ${preset.name}`}
-        >
-          <Copy className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => onEdit(preset.id)}
-          className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
-          aria-label={`Edit ${preset.name}`}
-        >
-          <Pencil className="w-4 h-4" />
-        </button>
+        <PresetActions
+          presetId={preset.id}
+          presetName={preset.name}
+          onClone={handleClonePreset}
+          onEdit={onEdit}
+          onDelete={handleDeletePreset}
+        />
       </div>
     </div>
   );
@@ -93,29 +96,51 @@ export const PresetSelector = observer(({
     </div>
   );
 
-  const renderDropdown = () => (
-    <div className="relative flex-1">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-2 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent flex items-center justify-between"
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-      >
-        <span className="truncate">
-          {currentPresetId ? presets.find((p) => p.id === currentPresetId)?.name || 'Select preset' : 'Select preset'}
-        </span>
-        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-      {isOpen && (
+  const renderDropdown = () => {
+    const currentPreset = currentPresetId ? presets.find((p) => p.id === currentPresetId) : null;
+    return (
+      <div className="relative flex-1" data-dropdown="preset-selector">
         <div
-          role="listbox"
-          className="absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto"
+          onClick={() => setIsOpen(!isOpen)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setIsOpen(!isOpen);
+            }
+          }}
+          className="w-full px-2 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent flex items-center justify-between cursor-pointer"
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
         >
-          {renderPresetList()}
+          <span className="truncate">
+            {currentPresetId ? currentPreset?.name || 'Select preset' : 'Select preset'}
+          </span>
+          <div className="flex items-center gap-1 shrink-0">
+            <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            {currentPreset && (
+              <PresetActions
+                presetId={currentPreset.id}
+                presetName={currentPreset.name}
+                onClone={handleClonePreset}
+                onEdit={onEdit}
+                onDelete={handleDeletePreset}
+              />
+            )}
+          </div>
         </div>
-      )}
-    </div>
-  );
+        {isOpen && (
+          <div
+            role="listbox"
+            className="absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto"
+          >
+            {renderPresetList()}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderListbox = () => (
     <div role="listbox" className="w-full space-y-1">
@@ -128,14 +153,15 @@ export const PresetSelector = observer(({
       <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
         Presets
       </label>
-      <div className="flex items-center gap-1">
+      <div className="space-y-1">
         {isListbox ? renderListbox() : renderDropdown()}
         <button
           onClick={handleCreatePreset}
-          className="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
+          className="w-full px-2 py-1.5 text-sm rounded-md transition-colors bg-gray-500 dark:bg-gray-700 text-white dark:text-gray-200 hover:bg-gray-600 dark:hover:bg-gray-600 flex items-center justify-center gap-2"
           aria-label="Create new preset"
         >
           <Plus className="w-4 h-4" />
+          New preset
         </button>
       </div>
     </div>

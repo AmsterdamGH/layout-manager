@@ -32,9 +32,6 @@ export const App = observer(() => {
         url,
         title,
         isVisible: true,
-        width: 100,
-        height: 100,
-        position: { x: 0, y: 0 },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });

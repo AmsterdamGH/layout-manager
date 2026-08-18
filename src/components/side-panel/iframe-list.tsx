@@ -29,6 +29,7 @@ export const IFrameList = observer(() => {
             aria-label="Add page"
           >
             <Plus className="w-4 h-4" />
+            Add Page
           </button>
         </li>
       </ul>

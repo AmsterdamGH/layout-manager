@@ -10,16 +10,10 @@ export interface Preset {
   mode: LayoutMode;
   iframes: Iframe[];
   order: string[];
-  panelSizes: Record<string, { width: number; height: number }>;
 }
 
 export interface Layout {
   appMode: AppMode;
   preset: Preset;
   presetId: string | null;
-}
-
-export interface PanelSize {
-  width: number;
-  height: number;
 }

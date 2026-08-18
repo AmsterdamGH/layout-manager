@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A React application for managing a dynamic layout of iframes with multiple layout modes, drag-and-drop reordering, persistent state storage, preset management with location hash support, and a dark theme with toggle.
+A React application for managing a dynamic layout of iframes with multiple layout modes, drag-and-drop reordering, persistent state storage, preset management with location hash support, export/import functionality, and a dark theme with toggle. The application starts in view mode by default.
 
 ## Tech Stack
 
@@ -59,6 +59,7 @@ src/
 │   ├── side-panel/
 │   │   ├── side-panel.tsx
 │   │   ├── preset-selector.tsx
+│   │   ├── preset-actions.tsx
 │   │   ├── iframe-list.tsx
 │   │   └── page-list.tsx
 │   ├── modals/
@@ -126,7 +127,13 @@ src/
 - Edit preset names
 - Delete presets
 - Create new presets with empty layout
+- Import presets from JSON files
+- Export presets as JSON files
 - Presets stored in localStorage under key `'presets'`
+- **PresetActions component:** Reusable component for preset action buttons (Delete, Clone, Edit) used in both dropdown and listbox views
+- **Action button order:** Delete, Clone, Edit
+- **Dropdown mode:** Action buttons appear inside the combobox after the chevron
+- **Listbox mode:** Action buttons appear on each preset item
 
 ### 6. Location Hash Support
 - Current preset reflected in URL hash using preset name (e.g., `#preset=My-Preset`)
@@ -142,6 +149,19 @@ src/
 - CSS variables for theme colors in `global.css`
 - No flash of unstyled content (FOUC) with inline script in `index.html`
 - Theme provider wraps the app with React context
+
+### 8. Export/Import Presets
+- Export current preset as JSON via modal with textarea
+- Copy preset JSON to clipboard
+- Download preset as JSON file
+- Import presets from JSON files via PresetSelector
+
+### 9. Side Panel Behavior
+- Panel auto-closes after 500ms when not hovering
+- Panel stays open when any modal is active (iframe edit, export, or preset edit)
+- Preset dropdown closes when clicking outside or when panel closes
+- **Add page button:** Has text caption "Add Page" next to Plus icon
+- **Preset actions:** Inline in combobox (dropdown mode) or on each item (listbox mode)
 
 ## Icons
 
@@ -172,9 +192,6 @@ interface Iframe {
   url: string;
   title: string;
   isVisible: boolean;
-  width: number;
-  height: number;
-  position: { x: number; y: number };
   createdAt: string;
   updatedAt: string;
 }
@@ -197,7 +214,6 @@ interface Preset {
   mode: 'layout-grid' | 'layout-horizontal' | 'layout-vertical';
   iframes: Iframe[];
   order: string[];
-  panelSizes: Record<string, { width: number; height: number }>;
 }
 ```
 
@@ -206,8 +222,8 @@ interface Preset {
 ### iframe-layout-store
 ```typescript
 class IframeLayoutStore {
-  preset: Preset = { id: 'default', name: 'Default', mode: 'layout-grid', iframes: [], order: [], panelSizes: {} };
-  layout: Layout = { appMode: 'edit', preset: this.preset, presetId: null };
+  preset: Preset = { id: 'default', name: 'Default', mode: 'layout-grid', iframes: [], order: [] };
+  layout: Layout = { appMode: 'view', preset: this.preset, presetId: null };
   presets: Map<string, Preset> = new Map();
   isLoading: boolean = false;
   error: string | null = null;
@@ -215,6 +231,8 @@ class IframeLayoutStore {
   draggedIframeId: string | null = null;
   dragOverIframeId: string | null = null;
   isAddIframeModalOpen: boolean = false;
+  isExportModalOpen: boolean = false;
+  isEditPresetModalOpen: boolean = false;
   modalMode: ModalMode = 'create';
   isHoveringLeftEdge: boolean = false;
   hoverTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -248,6 +266,12 @@ class IframeLayoutStore {
   @action closeSidePanel(): void;
   @action openSidePanelDelayed(): void;
   @action setHoveringLeftEdge(isHovering: boolean): void;
+  @action exportPreset(): string;
+  @action downloadPreset(): void;
+  @action openExportModal(): void;
+  @action closeExportModal(): void;
+  @action openEditPresetModal(): void;
+  @action closeEditPresetModal(): void;
 }
 ```
 

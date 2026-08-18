@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Pencil, Save, Sun, Moon } from 'lucide-react';
+import { Pencil, Save, Sun, Moon, Download } from 'lucide-react';
 import { LayoutSwitcher } from '../layout/layout-switcher';
 import { EditPresetModal } from '../modals/edit-preset-modal';
+import { ExportPresetModal } from '../modals/export-preset-modal';
 import { PresetSelector } from './preset-selector';
 import { IFrameList } from './iframe-list';
 import { iframeLayoutStore } from '@/stores';
@@ -22,7 +23,6 @@ export const SidePanel = observer(({
   currentMode,
   onModeChange,
 }: SidePanelProps) => {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editPresetName, setEditPresetName] = useState('');
   const [modalMode, setModalMode] = useState<ModalMode>('create');
   const appMode: AppMode = iframeLayoutStore.appMode;
@@ -47,10 +47,9 @@ export const SidePanel = observer(({
           mode: 'layout-grid',
           iframes: [],
           order: [],
-          panelSizes: {},
         });
       }
-      setIsEditModalOpen(false);
+      iframeLayoutStore.closeEditPresetModal();
       setEditPresetName('');
     }
   };
@@ -94,19 +93,19 @@ export const SidePanel = observer(({
                 const preset = iframeLayoutStore.presetList.find((p) => p.id === presetId);
                 setEditPresetName(preset ? `${preset.name} (copy)` : 'Preset (copy)');
                 setModalMode('clone');
-                setIsEditModalOpen(true);
+                iframeLayoutStore.openEditPresetModal();
               }
             }}
             onEdit={(presetId) => {
               const preset = iframeLayoutStore.presetList.find((p) => p.id === presetId);
               setEditPresetName(preset?.name || '');
               setModalMode('edit');
-              setIsEditModalOpen(true);
+              iframeLayoutStore.openEditPresetModal();
             }}
             onCreate={() => {
               setEditPresetName('');
               setModalMode('create');
-              setIsEditModalOpen(true);
+              iframeLayoutStore.openEditPresetModal();
             }}
           />
 
@@ -127,22 +126,36 @@ export const SidePanel = observer(({
 
         {/* Bottom section */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
-          {/* Edit/View Mode Toggle */}
-          <button
-            onClick={() => iframeLayoutStore.toggleAppMode()}
-            className="w-full px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-gray-500 dark:bg-gray-700 text-white dark:text-gray-100 hover:bg-gray-600 dark:hover:bg-gray-600 flex items-center justify-center"
-            aria-label={appMode === 'edit' ? 'Switch to view mode' : 'Switch to edit mode'}
-          >
-            {appMode === 'edit' ? <Save className="w-5 h-5" /> : <Pencil className="w-5 h-5" />}
-          </button>
+          <div className="flex gap-2">
+            {/* Edit/View Mode Toggle */}
+            <button
+              onClick={() => iframeLayoutStore.toggleAppMode()}
+              className="flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-gray-500 dark:bg-gray-700 text-white dark:text-gray-100 hover:bg-gray-600 dark:hover:bg-gray-600 flex items-center justify-center"
+              aria-label={appMode === 'edit' ? 'Switch to view mode' : 'Switch to edit mode'}
+            >
+              {appMode === 'edit' ? <Save className="w-5 h-5" /> : <Pencil className="w-5 h-5" />}
+            </button>
+            {/* Export Preset */}
+            <button
+              onClick={() => iframeLayoutStore.openExportModal()}
+              className="flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-gray-500 dark:bg-gray-700 text-white dark:text-gray-100 hover:bg-gray-600 dark:hover:bg-gray-600 flex items-center justify-center"
+              aria-label="Export preset as JSON"
+            >
+              <Download className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </aside>
       <EditPresetModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        isOpen={iframeLayoutStore.isEditPresetModalOpen}
+        onClose={iframeLayoutStore.closeEditPresetModal}
         onSubmit={handleEditSubmit}
         initialName={editPresetName}
         mode={modalMode}
+      />
+      <ExportPresetModal
+        isOpen={iframeLayoutStore.exportModalOpen}
+        onClose={iframeLayoutStore.closeExportModal}
       />
     </>
   );

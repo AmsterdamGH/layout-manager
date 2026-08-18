@@ -11,10 +11,9 @@ class IframeLayoutStore {
     mode: 'layout-grid',
     iframes: [],
     order: [],
-    panelSizes: {},
   };
   layout: Layout = {
-    appMode: 'edit',
+    appMode: 'view',
     preset: this.preset,
     presetId: null,
   };
@@ -24,6 +23,8 @@ class IframeLayoutStore {
   editingIframeId: string | null = null;
   isSidePanelOpen: boolean = false;
   isAddIframeModalOpen: boolean = false;
+  isExportModalOpen: boolean = false;
+  isEditPresetModalOpen: boolean = false;
   modalMode: ModalMode = 'create';
   isHoveringLeftEdge: boolean = false;
   hoverTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -92,7 +93,6 @@ class IframeLayoutStore {
       mode: 'layout-grid',
       iframes: [],
       order: [],
-      panelSizes: {},
     };
     this.presets.set(id, preset);
     this.preset = preset;
@@ -129,7 +129,6 @@ class IframeLayoutStore {
       preset.mode = this.layout.preset.mode;
       preset.iframes = [...this.layout.preset.iframes];
       preset.order = [...this.layout.preset.order];
-      preset.panelSizes = { ...this.layout.preset.panelSizes };
       this.savePresets();
     }
   }
@@ -144,7 +143,6 @@ class IframeLayoutStore {
   removeIframe = (id: string): void => {
     this.layout.preset.iframes = this.layout.preset.iframes.filter((i) => i.id !== id);
     this.layout.preset.order = this.layout.preset.order.filter((oid) => oid !== id);
-    delete this.layout.preset.panelSizes[id];
     this.syncPreset();
     this.saveToStorage();
   };
@@ -181,7 +179,6 @@ class IframeLayoutStore {
       mode: initialPreset?.mode ?? this.layout.preset.mode,
       iframes: initialPreset?.iframes ?? [...this.layout.preset.iframes],
       order: initialPreset?.order ?? [...this.layout.preset.order],
-      panelSizes: initialPreset?.panelSizes ?? { ...this.layout.preset.panelSizes },
     };
     this.presets.set(id, preset);
     this.preset = preset;
@@ -227,7 +224,6 @@ class IframeLayoutStore {
       mode: source.mode,
       iframes: [...source.iframes],
       order: [...source.order],
-      panelSizes: { ...source.panelSizes },
     };
     this.presets.set(id, preset);
     this.preset = preset;
@@ -291,6 +287,7 @@ class IframeLayoutStore {
     if (this.hoverTimeout) {
       clearTimeout(this.hoverTimeout);
     }
+    if (this.isAnyModalOpen) return;
     this.hoverTimeout = setTimeout(() => {
       this.isSidePanelOpen = false;
       this.hoverTimeout = null;
@@ -320,6 +317,22 @@ class IframeLayoutStore {
     this.editingIframeId = null;
     this.modalMode = 'create';
     this.isAddIframeModalOpen = false;
+  };
+
+  openEditPresetModal = (): void => {
+    this.isEditPresetModalOpen = true;
+  };
+
+  closeEditPresetModal = (): void => {
+    this.isEditPresetModalOpen = false;
+  };
+
+  openExportModal = (): void => {
+    this.isExportModalOpen = true;
+  };
+
+  closeExportModal = (): void => {
+    this.isExportModalOpen = false;
   };
 
   // Drag and drop actions
@@ -397,6 +410,34 @@ class IframeLayoutStore {
     saveToStorage(this.layout);
   };
 
+  exportPreset = (): string => {
+    const presetData = {
+      name: this.preset.name,
+      mode: this.preset.mode,
+      iframes: this.preset.iframes,
+      order: this.preset.order,
+    };
+    return JSON.stringify(presetData, null, 2);
+  };
+
+  downloadPreset = (): void => {
+    const presetData = {
+      name: this.preset.name,
+      mode: this.preset.mode,
+      iframes: this.preset.iframes,
+      order: this.preset.order,
+    };
+    const blob = new Blob([JSON.stringify(presetData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${this.preset.name.replace(/\s+/g, '-').toLowerCase()}-preset.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   clearStorage = (): void => {
     clearStorage();
     this.preset = {
@@ -405,10 +446,9 @@ class IframeLayoutStore {
       mode: 'layout-grid',
       iframes: [],
       order: [],
-      panelSizes: {},
     };
     this.layout = {
-      appMode: 'edit',
+      appMode: 'view',
       preset: this.preset,
       presetId: null,
     };
@@ -451,6 +491,18 @@ class IframeLayoutStore {
 
   get addIframeModalOpen(): boolean {
     return this.isAddIframeModalOpen || this.editingIframeId !== null;
+  }
+
+  get exportModalOpen(): boolean {
+    return this.isExportModalOpen;
+  }
+
+  get isAnyModalOpen(): boolean {
+    return this.isAddIframeModalOpen || this.editingIframeId !== null || this.isExportModalOpen || this.isEditPresetModalOpen;
+  }
+
+  get exportedJson(): string {
+    return this.exportPreset();
   }
 
   get currentModalMode(): ModalMode {
