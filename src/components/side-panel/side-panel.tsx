@@ -4,6 +4,7 @@ import { Pencil, Save, Sun, Moon, Download } from 'lucide-react';
 import { LayoutSwitcher } from '../layout/layout-switcher';
 import { EditPresetModal } from '../modals/edit-preset-modal';
 import { ExportPresetModal } from '../modals/export-preset-modal';
+import { ImportPresetModal } from '../modals/import-preset-modal';
 import { PresetSelector } from './preset-selector';
 import { IFrameList } from './iframe-list';
 import { iframeLayoutStore } from '@/stores';
@@ -107,6 +108,7 @@ export const SidePanel = observer(({
               setModalMode('create');
               iframeLayoutStore.openEditPresetModal();
             }}
+            onImport={() => iframeLayoutStore.openImportPresetModal()}
           />
 
           {/* Layout Mode */}
@@ -157,6 +159,7 @@ export const SidePanel = observer(({
         isOpen={iframeLayoutStore.exportModalOpen}
         onClose={iframeLayoutStore.closeExportModal}
       />
+      <ImportPresetModal />
     </>
   );
 });

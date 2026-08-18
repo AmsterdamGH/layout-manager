@@ -64,7 +64,9 @@ src/
 │   │   └── page-list.tsx
 │   ├── modals/
 │   │   ├── edit-iframe-modal.tsx
-│   │   └── edit-preset-modal.tsx
+│   │   ├── edit-preset-modal.tsx
+│   │   ├── export-preset-modal.tsx
+│   │   └── import-preset-modal.tsx
 │   └── ui/
 │       ├── button.tsx
 │       ├── input.tsx
@@ -87,7 +89,8 @@ src/
 │   ├── storage.ts
 │   ├── validation.ts
 │   ├── constants.ts
-│   └── hash.ts
+│   ├── hash.ts
+│   └── validate-preset.ts
 ├── app.tsx
 └── main.tsx
 ```
@@ -125,15 +128,18 @@ src/
 - Switch between presets via dropdown selector (or listbox when ≤5 presets)
 - Clone presets with a new name
 - Edit preset names
-- Delete presets
+- Delete presets (selects first preset after deletion if current preset is deleted)
 - Create new presets with empty layout
-- Import presets from JSON files
+- Import presets from JSON files via modal (Paste JSON or Upload File)
 - Export presets as JSON files
 - Presets stored in localStorage under key `'presets'`
 - **PresetActions component:** Reusable component for preset action buttons (Delete, Clone, Edit) used in both dropdown and listbox views
 - **Action button order:** Delete, Clone, Edit
 - **Dropdown mode:** Action buttons appear inside the combobox after the chevron
 - **Listbox mode:** Action buttons appear on each preset item
+- **Import preset modal:** Opens via Import button next to New preset button
+- **Duplicate handling:** Appends `-{timestamp}` suffix for duplicate names (case-sensitive)
+- **Validation:** Preset data validated on import (name, mode, iframes, order)
 
 ### 6. Location Hash Support
 - Current preset reflected in URL hash using preset name (e.g., `#preset=My-Preset`)
@@ -154,14 +160,19 @@ src/
 - Export current preset as JSON via modal with textarea
 - Copy preset JSON to clipboard
 - Download preset as JSON file
-- Import presets from JSON files via PresetSelector
+- Import presets via modal with two modes:
+  - **Paste JSON:** Textarea for pasting preset JSON data
+  - **Upload File:** Click-to-upload area for selecting a JSON file
+- Import validation checks preset structure (name, mode, iframes, order)
+- Duplicate preset names handled automatically with `-{timestamp}` suffix
 
 ### 9. Side Panel Behavior
 - Panel auto-closes after 500ms when not hovering
-- Panel stays open when any modal is active (iframe edit, export, or preset edit)
+- Panel stays open when any modal is active (iframe edit, export, preset edit, or import)
 - Preset dropdown closes when clicking outside or when panel closes
 - **Add page button:** Has text caption "Add Page" next to Plus icon
 - **Preset actions:** Inline in combobox (dropdown mode) or on each item (listbox mode)
+- **Import preset button:** Located next to New preset button in PresetSelector
 
 ## Icons
 
@@ -233,6 +244,7 @@ class IframeLayoutStore {
   isAddIframeModalOpen: boolean = false;
   isExportModalOpen: boolean = false;
   isEditPresetModalOpen: boolean = false;
+  isImportPresetModalOpen: boolean = false;
   modalMode: ModalMode = 'create';
   isHoveringLeftEdge: boolean = false;
   hoverTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -272,6 +284,11 @@ class IframeLayoutStore {
   @action closeExportModal(): void;
   @action openEditPresetModal(): void;
   @action closeEditPresetModal(): void;
+  @action openImportPresetModal(): void;
+  @action closeImportPresetModal(): void;
+  
+  // Private methods
+  private normalizePresetName(name: string): string;
 }
 ```
 

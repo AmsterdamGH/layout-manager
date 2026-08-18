@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Plus, ChevronDown } from 'lucide-react';
+import { Plus, ChevronDown, Upload } from 'lucide-react';
 import { iframeLayoutStore } from '@/stores';
 import { PresetActions } from './preset-actions';
 
@@ -8,6 +8,7 @@ interface PresetSelectorProps {
   onClone: (presetId: string) => void;
   onEdit: (presetId: string) => void;
   onCreate: () => void;
+  onImport: () => void;
 }
 
 const MAX_LISTBOX_PRESETS = 5;
@@ -16,6 +17,7 @@ export const PresetSelector = observer(({
   onClone,
   onEdit,
   onCreate,
+  onImport,
 }: PresetSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const presets = iframeLayoutStore.presetList;
@@ -155,14 +157,23 @@ export const PresetSelector = observer(({
       </label>
       <div className="space-y-1">
         {isListbox ? renderListbox() : renderDropdown()}
-        <button
-          onClick={handleCreatePreset}
-          className="w-full px-2 py-1.5 text-sm rounded-md transition-colors bg-gray-500 dark:bg-gray-700 text-white dark:text-gray-200 hover:bg-gray-600 dark:hover:bg-gray-600 flex items-center justify-center gap-2"
-          aria-label="Create new preset"
-        >
-          <Plus className="w-4 h-4" />
-          New preset
-        </button>
+        <div className="flex gap-1">
+          <button
+            onClick={handleCreatePreset}
+            className="flex-1 px-2 py-1.5 text-sm rounded-md transition-colors bg-gray-500 dark:bg-gray-700 text-white dark:text-gray-200 hover:bg-gray-600 dark:hover:bg-gray-600 flex items-center justify-center gap-2"
+            aria-label="Create new preset"
+          >
+            <Plus className="w-4 h-4" />
+            New preset
+          </button>
+          <button
+            onClick={onImport}
+            className="p-2 rounded-md transition-colors bg-gray-500 dark:bg-gray-700 text-white dark:text-gray-200 hover:bg-gray-600 dark:hover:bg-gray-600"
+            aria-label="Import preset"
+          >
+            <Upload className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

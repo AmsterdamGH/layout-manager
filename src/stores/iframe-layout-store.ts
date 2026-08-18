@@ -25,6 +25,7 @@ class IframeLayoutStore {
   isAddIframeModalOpen: boolean = false;
   isExportModalOpen: boolean = false;
   isEditPresetModalOpen: boolean = false;
+  isImportPresetModalOpen: boolean = false;
   modalMode: ModalMode = 'create';
   isHoveringLeftEdge: boolean = false;
   hoverTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -53,6 +54,15 @@ class IframeLayoutStore {
     } catch (err) {
       console.error('Failed to load presets:', err);
     }
+  }
+
+  private deduplicatePresetName(name: string): string {
+    const existing = Array.from(this.presets.values()).find((p) => p.name === name);
+    if (existing) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      return `${name}-${timestamp}`;
+    }
+    return name;
   }
 
   private savePresets(): void {
@@ -165,17 +175,12 @@ class IframeLayoutStore {
   };
 
   createPreset = (name: string, initialPreset?: Partial<Preset>): string => {
-    const existing = Array.from(this.presets.values()).find(
-      (p) => p.name.toLowerCase() === name.toLowerCase()
-    );
-    if (existing) {
-      throw new Error(`Preset "${name}" already exists`);
-    }
+    const finalName = this.deduplicatePresetName(name);
 
     const id = `preset-${Date.now()}`;
     const preset: Preset = {
       id,
-      name,
+      name: finalName,
       mode: initialPreset?.mode ?? this.layout.preset.mode,
       iframes: initialPreset?.iframes ?? [...this.layout.preset.iframes],
       order: initialPreset?.order ?? [...this.layout.preset.order],
@@ -198,11 +203,18 @@ class IframeLayoutStore {
   };
 
   deletePreset = (presetId: string): void => {
+    const wasCurrent = this.layout.presetId === presetId;
     this.presets.delete(presetId);
     this.savePresets();
-    if (this.layout.presetId === presetId) {
+    if (wasCurrent) {
       removeHashPreset();
       this.layout.presetId = null;
+      // Select first preset if available
+      const firstPreset = Array.from(this.presets.values())[0];
+      if (firstPreset) {
+        this.applyPreset(firstPreset);
+        setHashPreset(firstPreset.name);
+      }
     }
   };
 
@@ -210,28 +222,11 @@ class IframeLayoutStore {
     const source = this.presets.get(sourceId);
     if (!source) throw new Error('Preset not found');
 
-    const existing = Array.from(this.presets.values()).find(
-      (p) => p.name.toLowerCase() === newName.toLowerCase()
-    );
-    if (existing) {
-      throw new Error(`Preset "${newName}" already exists`);
-    }
-
-    const id = `preset-${Date.now()}`;
-    const preset: Preset = {
-      id,
-      name: newName,
+    return this.createPreset(newName, {
       mode: source.mode,
       iframes: [...source.iframes],
       order: [...source.order],
-    };
-    this.presets.set(id, preset);
-    this.preset = preset;
-    this.layout.preset = preset;
-    this.layout.presetId = id;
-    this.savePresets();
-    setHashPreset(preset.name);
-    return id;
+    });
   };
 
   editPresetName = (presetId: string, newName: string): void => {
@@ -325,6 +320,14 @@ class IframeLayoutStore {
 
   closeEditPresetModal = (): void => {
     this.isEditPresetModalOpen = false;
+  };
+
+  openImportPresetModal = (): void => {
+    this.isImportPresetModalOpen = true;
+  };
+
+  closeImportPresetModal = (): void => {
+    this.isImportPresetModalOpen = false;
   };
 
   openExportModal = (): void => {
@@ -497,8 +500,12 @@ class IframeLayoutStore {
     return this.isExportModalOpen;
   }
 
+  get importPresetModalOpen(): boolean {
+    return this.isImportPresetModalOpen;
+  }
+
   get isAnyModalOpen(): boolean {
-    return this.isAddIframeModalOpen || this.editingIframeId !== null || this.isExportModalOpen || this.isEditPresetModalOpen;
+    return this.isAddIframeModalOpen || this.editingIframeId !== null || this.isExportModalOpen || this.isEditPresetModalOpen || this.isImportPresetModalOpen;
   }
 
   get exportedJson(): string {
