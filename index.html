@@ -7,19 +7,14 @@
   <title>Layout Manager</title>
   <script>
     (function() {
-      // Dynamically set base tag to window location
-      const base = document.createElement('base');
-      base.href = window.location.href;
-      document.head.appendChild(base);
-
       const stored = localStorage.getItem('theme-preference');
       if (stored === 'dark') {
         document.documentElement.classList.add('dark');
       }
     })();
   </script>
-  <script type="module" crossorigin src="/assets/index-D5qP4FUW.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-dcEsXp6M.css">
+  <script type="module" crossorigin src="/layout-manager/assets/index-D5qP4FUW.js"></script>
+  <link rel="stylesheet" crossorigin href="/layout-manager/assets/index-dcEsXp6M.css">
 </head>
 <body>
   <div id="root"></div>
