@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Plus, ChevronDown, Upload } from 'lucide-react';
 import { iframeLayoutStore } from '@/stores';
 import { PresetActions } from './preset-actions';
+import { getPresetUrl } from '@/utils/hash';
 
 interface PresetSelectorProps {
   onClone: (presetId: string) => void;
@@ -64,19 +65,34 @@ export const PresetSelector = observer(({
     }
   }, [isOpen]);
 
+  const handlePresetClick = (presetId: string, e: React.MouseEvent) => {
+    // Allow opening in new tab via right-click, middle-click, or ctrl/cmd+click
+    if (e.button === 1 || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) {
+      return;
+    }
+    e.preventDefault();
+    handleSelect(presetId);
+  };
+
   const renderPresetItem = (preset: typeof presets[0]) => (
     <div
       key={preset.id}
       role="option"
       aria-selected={currentPresetId === preset.id}
-      onClick={() => handleSelect(preset.id)}
-      className={`px-3 py-2 text-sm flex items-center justify-between cursor-pointer ${
+      onClick={(e) => handlePresetClick(preset.id, e)}
+      className={`px-3 py-2 text-sm flex items-center justify-between ${
         currentPresetId === preset.id
           ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200'
           : 'text-gray-900 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
       }`}
     >
-      <span className="truncate">{preset.name}</span>
+      <a
+        href={getPresetUrl(preset.name)}
+        className="truncate hover:underline"
+        title={`Open "${preset.name}" in new tab`}
+      >
+        {preset.name}
+      </a>
       <div className="flex items-center gap-1">
         <PresetActions
           presetId={preset.id}

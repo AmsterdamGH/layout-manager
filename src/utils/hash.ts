@@ -24,3 +24,9 @@ export const removeHashPreset = (): void => {
     window.history.replaceState(null, '', hash.replace(/#preset=[^&]*/, ''));
   }
 };
+
+export const getPresetUrl = (presetName: string): string => {
+  if (typeof window === 'undefined') return '';
+  const baseUrl = window.location.origin + window.location.pathname;
+  return `${baseUrl}#${HASH_KEY}=${encodeURIComponent(presetName)}`;
+};
