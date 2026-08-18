@@ -28,33 +28,21 @@ export const SplitLayout = observer(({ orientation = 'horizontal' }: SplitLayout
     );
   }
 
-  const firstIframe = orderedIframes[0];
-  const secondIframe = orderedIframes.length > 1 ? orderedIframes[1] : null;
-
   const containerClass = orientation === 'horizontal' ? 'flex-row' : 'flex-col';
 
   return (
     <div className={`flex ${containerClass} gap-2 h-full`}>
-      <div className="flex-1 min-w-0">
-        <Panel
-          iframe={firstIframe}
-          className="h-full"
-          isEditMode={isEditMode}
-          onEdit={isEditMode ? handleEdit : undefined}
-          onDelete={isEditMode ? handleDelete : undefined}
-        />
-      </div>
-      {secondIframe && (
-        <div className="flex-1 min-w-0">
+      {orderedIframes.map((iframe) => (
+        <div key={iframe.id} className="flex-1 min-w-0">
           <Panel
-            iframe={secondIframe}
+            iframe={iframe}
             className="h-full"
             isEditMode={isEditMode}
             onEdit={isEditMode ? handleEdit : undefined}
             onDelete={isEditMode ? handleDelete : undefined}
           />
         </div>
-      )}
+      ))}
     </div>
   );
 });

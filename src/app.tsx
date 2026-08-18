@@ -63,11 +63,11 @@ export const App = observer(() => {
           </div>
         )}
 
-        {iframeLayoutStore.currentMode === 'grid' && <GridLayout />}
-        {iframeLayoutStore.currentMode === 'split-horizontal' && (
+        {iframeLayoutStore.currentMode === 'layout-grid' && <GridLayout />}
+        {iframeLayoutStore.currentMode === 'layout-horizontal' && (
           <SplitLayout orientation="horizontal" />
         )}
-        {iframeLayoutStore.currentMode === 'split-vertical' && (
+        {iframeLayoutStore.currentMode === 'layout-vertical' && (
           <SplitLayout orientation="vertical" />
         )}
       </main>

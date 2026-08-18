@@ -5,7 +5,7 @@ import { loadFromStorage, saveToStorage, clearStorage } from '@/utils/storage';
 
 class IframeLayoutStore {
   layout: Layout = {
-    mode: 'grid',
+    mode: 'layout-grid',
     appMode: 'edit',
     iframes: [],
     order: [],
@@ -164,7 +164,7 @@ class IframeLayoutStore {
   clearStorage = (): void => {
     clearStorage();
     this.layout = {
-      mode: 'grid',
+      mode: 'layout-grid',
       appMode: 'edit',
       iframes: [],
       order: [],

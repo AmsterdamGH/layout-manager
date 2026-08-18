@@ -98,8 +98,8 @@ src/
 
 ### 2. Layout Modes
 - **Grid:** Equal-sized panels in a grid
-- **Split Horizontal:** Two panels side-by-side
-- **Split Vertical:** Two panels stacked
+- **Horizontal:** Panels arranged horizontally (side-by-side)
+- **Vertical:** Panels arranged vertically (stacked)
 
 ### 3. Drag and Drop Reordering
 - Drag panels using the grip handle (⋮⋮)
@@ -112,6 +112,23 @@ src/
 - Load saved layout on initialization
 - Debounced saves (500ms)
 - Error handling for localStorage
+
+## Icons
+
+The application uses Lucide React icons for consistent iconography:
+
+| Icon | Usage |
+|------|-------|
+| `Grid3x3` | Grid layout mode |
+| `Columns3` | Horizontal layout mode |
+| `Rows3` | Vertical layout mode |
+| `Plus` | Add iframe button |
+| `Pencil`, `Save` | Edit mode toggle |
+| `X` | Close buttons |
+| `Loader2` | Loading states |
+| `Grip`, `Pencil`, `Trash2` | Panel actions |
+
+Icons are imported from `lucide-react` and used as React components with consistent sizing (`h-4 w-4`). Layout switcher buttons display only icons (no labels) centered in a row.
 
 ## Data Models
 
@@ -133,7 +150,7 @@ interface Iframe {
 ### Layout
 ```typescript
 interface Layout {
-  mode: 'grid' | 'split-horizontal' | 'split-vertical';
+  mode: 'layout-grid' | 'layout-horizontal' | 'layout-vertical';
   iframes: Iframe[];
   order: string[]; // iframe IDs in order
   panelSizes: Record<string, { width: number; height: number }>;
@@ -145,7 +162,7 @@ interface Layout {
 ### iframe-layout-store
 ```typescript
 class IframeLayoutStore {
-  @observable layout: Layout = { mode: 'grid', iframes: [], order: [], panelSizes: {} };
+  @observable layout: Layout = { mode: 'layout-grid', iframes: [], order: [], panelSizes: {} };
   @observable isLoading: boolean = false;
   @observable error: string | null = null;
   @observable editingIframeId: string | null = null;

@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
-
-type LayoutMode = 'grid' | 'split-horizontal' | 'split-vertical';
+import { Columns3, Grid3x3, Rows3 } from 'lucide-react';
+import type { LayoutMode } from '@/types/layout';
 
 interface LayoutSwitcherProps {
   currentMode: LayoutMode;
@@ -9,27 +9,26 @@ interface LayoutSwitcherProps {
 
 export const LayoutSwitcher = observer(({ currentMode, onChange }: LayoutSwitcherProps) => {
   const layouts = [
-    { id: 'grid' as const, label: 'Grid', icon: '⊞' },
-    { id: 'split-horizontal' as const, label: 'Split Horizontal', icon: '◧' },
-    { id: 'split-vertical' as const, label: 'Split Vertical', icon: '◪' },
+    { id: 'layout-grid' as const, icon: Grid3x3 },
+    { id: 'layout-horizontal' as const, icon: Columns3 },
+    { id: 'layout-vertical' as const, icon: Rows3 },
   ];
 
   return (
-    <div className="inline-flex items-center gap-1 p-1 bg-gray-100 rounded-md" role="radiogroup" aria-label="Layout mode">
+    <div className="flex flex-row items-center justify-center gap-1 p-1 bg-gray-100 rounded-md" role="radiogroup" aria-label="Layout mode">
       {layouts.map((layout) => (
         <button
           key={layout.id}
           role="radio"
           aria-checked={currentMode === layout.id}
           onClick={() => onChange(layout.id)}
-          className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+          className={`px-2.5 py-2 text-sm rounded-md transition-colors ${
             currentMode === layout.id
               ? 'bg-white shadow-sm text-gray-900'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
           }`}
         >
-          <span className="mr-1.5">{layout.icon}</span>
-          {layout.label}
+          <layout.icon className="h-4 w-4" />
         </button>
       ))}
     </div>

@@ -1,6 +1,6 @@
 import type { Iframe } from './iframe';
 
-export type LayoutMode = 'grid' | 'split-horizontal' | 'split-vertical';
+export type LayoutMode = 'layout-grid' | 'layout-horizontal' | 'layout-vertical';
 export type AppMode = 'edit' | 'view';
 
 export interface Layout {
