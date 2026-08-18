@@ -23,7 +23,7 @@ export const SplitLayout = observer(({ orientation = 'horizontal' }: SplitLayout
 
   if (orderedIframes.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
         <AddIframeButton onClick={() => iframeLayoutStore.openAddIframeModal()} />
       </div>
     );

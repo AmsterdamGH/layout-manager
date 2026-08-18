@@ -27,6 +27,7 @@ class IframeLayoutStore {
   modalMode: ModalMode = 'create';
   isHoveringLeftEdge: boolean = false;
   hoverTimeout: ReturnType<typeof setTimeout> | null = null;
+  openTimeout: ReturnType<typeof setTimeout> | null = null;
   draggedIframeId: string | null = null;
   dragOverIframeId: string | null = null;
 
@@ -269,6 +270,23 @@ class IframeLayoutStore {
     this.isSidePanelOpen = true;
   };
 
+  openSidePanelDelayed = (): void => {
+    if (this.openTimeout) {
+      clearTimeout(this.openTimeout);
+    }
+    if (this.hoverTimeout) {
+      clearTimeout(this.hoverTimeout);
+      this.hoverTimeout = null;
+    }
+    this.openTimeout = setTimeout(() => {
+      // Only open if still hovering
+      if (this.isHoveringLeftEdge) {
+        this.isSidePanelOpen = true;
+      }
+      this.openTimeout = null;
+    }, 1000);
+  };
+
   closeSidePanel = (): void => {
     if (this.hoverTimeout) {
       clearTimeout(this.hoverTimeout);
@@ -276,7 +294,7 @@ class IframeLayoutStore {
     this.hoverTimeout = setTimeout(() => {
       this.isSidePanelOpen = false;
       this.hoverTimeout = null;
-    }, 300);
+    }, 500);
   };
 
   openAddIframeModal = (): void => {
@@ -288,7 +306,7 @@ class IframeLayoutStore {
   setHoveringLeftEdge = (isHovering: boolean): void => {
     this.isHoveringLeftEdge = isHovering;
     if (isHovering) {
-      this.openSidePanel();
+      this.openSidePanelDelayed();
     } else {
       this.closeSidePanel();
     }

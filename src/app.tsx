@@ -46,7 +46,7 @@ export const App = observer(() => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
       <HoverZone />
       <SidePanel
         isOpen={iframeLayoutStore.sidePanelOpen}
@@ -57,7 +57,7 @@ export const App = observer(() => {
 
       <main className="flex-1 p-2 overflow-auto">
         {iframeLayoutStore.error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700">
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 dark:bg-red-900/50 dark:border-red-800 dark:text-red-200">
             {iframeLayoutStore.error}
           </div>
         )}

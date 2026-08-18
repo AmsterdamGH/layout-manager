@@ -15,10 +15,10 @@ export function Loading({ size = 'md', text }: LoadingProps) {
   return (
     <div className="flex flex-col items-center justify-center gap-2" role="status" aria-label={text || 'Loading'}>
       <Loader2
-        className={`animate-spin ${sizeClasses[size]} text-blue-600`}
+        className={`animate-spin ${sizeClasses[size]} text-blue-600 dark:text-blue-400`}
         aria-hidden="true"
       />
-      {text && <span className="text-sm text-gray-600">{text}</span>}
+      {text && <span className="text-sm text-gray-600 dark:text-gray-400">{text}</span>}
     </div>
   );
 };

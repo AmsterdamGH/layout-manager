@@ -48,10 +48,10 @@ export function EditIframeModal({ iframe, isOpen, onClose, onSave, mode = 'creat
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog" aria-modal="true">
-      <div className="w-full max-w-md mx-4 p-6 bg-white rounded-lg shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">{mode === 'edit' ? 'Edit Iframe' : 'Add Page'}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700" aria-label="Close">
+      <div className="w-full max-w-md mx-4 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+        <div className="flex items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{mode === 'edit' ? 'Edit Iframe' : 'Add Page'}</h2>
+          <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" aria-label="Close">
             ×
           </button>
         </div>

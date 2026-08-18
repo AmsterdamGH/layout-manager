@@ -2,6 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-primary: #f9fafb;
+  --bg-secondary: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --hover-bg: #f3f4f6;
+  --sidebar-bg: #ffffff;
+  --modal-bg: #ffffff;
+  --input-bg: #f9fafb;
+  --input-border: #d1d5db;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+.dark {
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --border-color: #374155;
+  --hover-bg: #374155;
+  --sidebar-bg: #1f2937;
+  --modal-bg: #1f2937;
+  --input-bg: #374155;
+  --input-border: #4b5563;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+@layer utilities {
+  .dark\:bg-gray-800 { background-color: #1f2937; }
+  .dark\:bg-gray-700 { background-color: #374155; }
+  .dark\:bg-gray-600 { background-color: #4b5563; }
+  .dark\:text-gray-100 { color: #f9fafb; }
+  .dark\:text-gray-200 { color: #e5e7eb; }
+  .dark\:text-gray-300 { color: #d1d5db; }
+  .dark\:text-gray-400 { color: #9ca3af; }
+  .dark\:border-gray-700 { border-color: #374155; }
+  .dark\:border-gray-600 { border-color: #4b5563; }
+  .dark\:hover\:bg-gray-700:hover { background-color: #374155; }
+  .dark\:hover\:bg-gray-600:hover { background-color: #4b5563; }
+  .dark\:hover\:text-gray-200:hover { color: #e5e7eb; }
+  .dark\:hover\:text-gray-300:hover { color: #d1d5db; }
+  .dark\:placeholder-gray-500::placeholder { color: #6b7280; }
+  .dark\:focus\:ring-blue-400:focus { --tw-ring-color: #60a5fa; }
+  .dark\:focus\:ring-red-400:focus { --tw-ring-color: #f87171; }
+  .dark\:text-blue-400 { color: #60a5fa; }
+  .dark\:text-red-400 { color: #f87171; }
+  .dark\:bg-red-900\/50 { background-color: rgba(127, 29, 53, 0.5); }
+  .dark\:text-blue-200 { color: #93c5fd; }
+  .dark\:bg-blue-900\/50 { background-color: rgba(30, 58, 128, 0.5); }
+  .dark\:bg-blue-800 { background-color: #1e3a8a; }
+  .dark\:bg-blue-900 { background-color: #1e1b4b; }
+  .dark\:text-blue-100 { color: #dbeafe; }
+  .dark\:text-red-100 { color: #fde2e2; }
+  .dark\:bg-red-800 { background-color: #991b1b; }
+  .dark\:bg-gray-900 { background-color: #111827; }
+  .dark\:bg-black\/70 { background-color: rgba(0, 0, 0, 0.7); }
+  .dark\:text-gray-500 { color: #6b7280; }
+}
+
 body {
   margin: 0;
   padding: 0;

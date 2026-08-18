@@ -5,6 +5,14 @@
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Layout Manager</title>
+  <script>
+    (function() {
+      const stored = localStorage.getItem('theme-preference');
+      if (stored === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
 </head>
 <body>
   <div id="root"></div>

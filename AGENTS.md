@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A React application for managing a dynamic layout of iframes with multiple layout modes, drag-and-drop reordering, persistent state storage, and preset management with location hash support.
+A React application for managing a dynamic layout of iframes with multiple layout modes, drag-and-drop reordering, persistent state storage, preset management with location hash support, and a dark theme with toggle.
 
 ## Tech Stack
 
@@ -71,7 +71,10 @@ src/
 ├── stores/
 │   ├── iframe-layout-store.ts
 │   ├── iframe-store.ts
+│   ├── theme-store.ts
 │   └── index.ts
+├── providers/
+│   └── theme-provider.tsx
 ├── hooks/
 │   ├── use-local-storage.ts
 │   ├── use-debounce.ts
@@ -125,12 +128,20 @@ src/
 - Create new presets with empty layout
 - Presets stored in localStorage under key `'presets'`
 
-### 7. Location Hash Support
+### 6. Location Hash Support
 - Current preset reflected in URL hash using preset name (e.g., `#preset=My-Preset`)
 - Hash updated when switching presets or creating new ones
 - Browser back/forward buttons work correctly
 - Hash validated on load - invalid presets are ignored
 - On first load with no hash, a default preset is created and hash is set
+
+### 7. Dark Theme
+- Toggle between light and dark themes via button in side panel header
+- Theme preference persisted to localStorage
+- Tailwind CSS `dark:` variant classes used for styling
+- CSS variables for theme colors in `global.css`
+- No flash of unstyled content (FOUC) with inline script in `index.html`
+- Theme provider wraps the app with React context
 
 ## Icons
 
@@ -148,6 +159,7 @@ The application uses Lucide React icons for consistent iconography:
 | `Grip`, `Pencil`, `Trash2` | Panel actions |
 | `Copy` | Clone preset button |
 | `ChevronDown` | Dropdown toggle |
+| `Sun`, `Moon` | Theme toggle (side panel header) |
 
 Icons are imported from `lucide-react` and used as React components with consistent sizing (`h-4 w-4`). Layout switcher buttons display only icons (no labels) centered in a row.
 
@@ -204,6 +216,9 @@ class IframeLayoutStore {
   dragOverIframeId: string | null = null;
   isAddIframeModalOpen: boolean = false;
   modalMode: ModalMode = 'create';
+  isHoveringLeftEdge: boolean = false;
+  hoverTimeout: ReturnType<typeof setTimeout> | null = null;
+  openTimeout: ReturnType<typeof setTimeout> | null = null;
   
   // Actions
   @action addIframe(iframe: Iframe): void;
@@ -227,6 +242,12 @@ class IframeLayoutStore {
   @action editPresetName(presetId: string, newName: string): void;
   @action openAddIframeModal(): void;
   @action openEditModal(id: string): void;
+  @action toggleAppMode(): void;
+  @action toggleSidePanel(): void;
+  @action openSidePanel(): void;
+  @action closeSidePanel(): void;
+  @action openSidePanelDelayed(): void;
+  @action setHoveringLeftEdge(isHovering: boolean): void;
 }
 ```
 
@@ -239,6 +260,17 @@ class IframeStore {
   @action updateIframe(id: string, updates: Partial<Iframe>): void;
   @action removeIframe(id: string): void;
   @action toggleVisibility(id: string): void;
+}
+```
+
+### theme-store
+```typescript
+class ThemeStore {
+  theme: Theme = 'light';
+  
+  // Actions
+  @action setTheme(theme: Theme): void;
+  @action toggleTheme(): void;
 }
 ```
 
