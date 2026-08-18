@@ -59,9 +59,9 @@ src/
 │   ├── side-panel/
 │   │   ├── side-panel.tsx
 │   │   ├── preset-selector.tsx
-│   │   └── add-iframe-button.tsx
+│   │   ├── iframe-list.tsx
+│   │   └── page-list.tsx
 │   ├── modals/
-│   │   ├── add-iframe-modal.tsx
 │   │   ├── edit-iframe-modal.tsx
 │   │   └── edit-preset-modal.tsx
 │   └── ui/
@@ -96,7 +96,8 @@ src/
 - Remove iframes
 - Toggle iframe visibility
 - Load iframe with loading/error states
-- AddIframeButton component used in layouts and side panel
+- Unified modal for adding and editing iframes (EditIframeModal)
+- IFrameList component in side panel for managing iframes
 
 ### 2. Layout Modes
 - **Grid:** Equal-sized panels in a grid
@@ -124,7 +125,7 @@ src/
 - Create new presets with empty layout
 - Presets stored in localStorage under key `'presets'`
 
-### 6. Location Hash Support
+### 7. Location Hash Support
 - Current preset reflected in URL hash using preset name (e.g., `#preset=My-Preset`)
 - Hash updated when switching presets or creating new ones
 - Browser back/forward buttons work correctly
@@ -140,7 +141,7 @@ The application uses Lucide React icons for consistent iconography:
 | `Grid3x3` | Grid layout mode |
 | `Columns3` | Horizontal layout mode |
 | `Rows3` | Vertical layout mode |
-| `Plus` | Add page button (in layouts and side panel) |
+| `Plus` | Add page button (in IFrameList and side panel) |
 | `Pencil`, `Save` | Edit mode toggle |
 | `X` | Close buttons |
 | `Loader2` | Loading states |
@@ -202,6 +203,7 @@ class IframeLayoutStore {
   draggedIframeId: string | null = null;
   dragOverIframeId: string | null = null;
   isAddIframeModalOpen: boolean = false;
+  modalMode: ModalMode = 'create';
   
   // Actions
   @action addIframe(iframe: Iframe): void;
@@ -224,7 +226,7 @@ class IframeLayoutStore {
   @action clonePreset(sourceId: string, newName: string): string;
   @action editPresetName(presetId: string, newName: string): void;
   @action openAddIframeModal(): void;
-  @action closeAddIframeModal(): void;
+  @action openEditModal(id: string): void;
 }
 ```
 

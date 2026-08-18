@@ -2,7 +2,7 @@ import type { Iframe } from './iframe';
 
 export type LayoutMode = 'layout-grid' | 'layout-horizontal' | 'layout-vertical';
 export type AppMode = 'edit' | 'view';
-export type PresetModalMode = 'create' | 'edit' | 'clone';
+export type ModalMode = 'create' | 'edit' | 'clone';
 
 export interface Preset {
   id: string;

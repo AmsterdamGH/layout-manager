@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { X } from 'lucide-react';
-import type { PresetModalMode } from '@/types/layout';
+import type { ModalMode } from '@/types/layout';
 
 interface EditPresetModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (name: string) => void;
   initialName?: string;
-  mode?: PresetModalMode;
+  mode?: ModalMode;
 }
 
 export const EditPresetModal = observer(({
@@ -16,7 +16,7 @@ export const EditPresetModal = observer(({
   onClose,
   onSubmit,
   initialName = '',
-  mode = 'clone' as PresetModalMode,
+  mode = 'create' as ModalMode,
 }: EditPresetModalProps) => {
   const [name, setName] = useState(initialName);
   const [error, setError] = useState<string | null>(null);

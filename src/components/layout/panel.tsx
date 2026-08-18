@@ -109,7 +109,7 @@ export const Panel = observer(({ iframe, className = '', isEditMode = true, onEd
           onLoad={handleLoad}
           onError={handleError}
           className="w-full h-full border-0"
-          style={{ pointerEvents: 'none' }}
+          style={isEditMode ? { pointerEvents: 'none' } : undefined}
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
           loading="lazy"
         />

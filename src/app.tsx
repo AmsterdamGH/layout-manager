@@ -5,7 +5,6 @@ import { HoverZone } from './components/hover-zone';
 import { SidePanel } from './components/side-panel/side-panel';
 import { GridLayout } from './components/layout/grid-layout';
 import { SplitLayout } from './components/layout/split-layout';
-import { AddIframeModal } from './components/modals/add-iframe-modal';
 import { EditIframeModal } from './components/modals/edit-iframe-modal';
 import { Loading } from './components/ui/loading';
 import { iframeLayoutStore } from './stores';
@@ -23,23 +22,23 @@ export const App = observer(() => {
     document.title = iframeLayoutStore.orderedIframes.map((i) => i.title).join(' | ') || 'Layout Manager';
   }, [iframeLayoutStore.orderedIframes]);
 
-  const handleAddIframe = (url: string, title: string) => {
-    iframeLayoutStore.addIframe({
-      id: `iframe-${Date.now()}`,
-      url,
-      title,
-      isVisible: true,
-      width: 100,
-      height: 100,
-      position: { x: 0, y: 0 },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-  };
-
-  const handleEditIframe = (id: string, url: string, title: string) => {
-    iframeLayoutStore.updateIframe(id, { url, title });
-    iframeLayoutStore.closeEditModal();
+  const handleSaveIframe = (id: string, url: string, title: string) => {
+    const existingIframe = iframeLayoutStore.orderedIframes.find((i) => i.id === id);
+    if (existingIframe) {
+      iframeLayoutStore.updateIframe(id, { url, title });
+    } else {
+      iframeLayoutStore.addIframe({
+        id,
+        url,
+        title,
+        isVisible: true,
+        width: 100,
+        height: 100,
+        position: { x: 0, y: 0 },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    }
   };
 
   if (iframeLayoutStore.isLoading) {
@@ -54,7 +53,6 @@ export const App = observer(() => {
         onClose={() => iframeLayoutStore.closeSidePanel()}
         currentMode={iframeLayoutStore.currentMode}
         onModeChange={(mode) => iframeLayoutStore.switchLayout(mode)}
-        onAddIframe={() => iframeLayoutStore.openAddIframeModal()}
       />
 
       <main className="flex-1 p-2 overflow-auto">
@@ -73,17 +71,12 @@ export const App = observer(() => {
         )}
       </main>
 
-      <AddIframeModal
-        isOpen={iframeLayoutStore.addIframeModalOpen}
-        onClose={() => iframeLayoutStore.closeAddIframeModal()}
-        onSubmit={handleAddIframe}
-      />
-
       <EditIframeModal
         iframe={iframeLayoutStore.editingIframeId ? iframeLayoutStore.orderedIframes.find((i) => i.id === iframeLayoutStore.editingIframeId) || null : null}
-        isOpen={!!iframeLayoutStore.editingIframeId}
+        isOpen={!!iframeLayoutStore.editingIframeId || iframeLayoutStore.isAddIframeModalOpen}
         onClose={() => iframeLayoutStore.closeEditModal()}
-        onSave={handleEditIframe}
+        onSave={handleSaveIframe}
+        mode={iframeLayoutStore.currentModalMode}
       />
     </div>
   );

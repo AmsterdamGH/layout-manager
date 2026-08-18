@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import type { Layout, Preset, AppMode } from '@/types/layout';
+import type { Layout, Preset, AppMode, ModalMode } from '@/types/layout';
 import type { Iframe } from '@/types/iframe';
 import { loadFromStorage, saveToStorage, clearStorage } from '@/utils/storage';
 import { getHashPreset, setHashPreset, removeHashPreset } from '@/utils/hash';
@@ -24,6 +24,7 @@ class IframeLayoutStore {
   editingIframeId: string | null = null;
   isSidePanelOpen: boolean = false;
   isAddIframeModalOpen: boolean = false;
+  modalMode: ModalMode = 'create';
   isHoveringLeftEdge: boolean = false;
   hoverTimeout: ReturnType<typeof setTimeout> | null = null;
   draggedIframeId: string | null = null;
@@ -279,11 +280,9 @@ class IframeLayoutStore {
   };
 
   openAddIframeModal = (): void => {
+    this.editingIframeId = null;
     this.isAddIframeModalOpen = true;
-  };
-
-  closeAddIframeModal = (): void => {
-    this.isAddIframeModalOpen = false;
+    this.modalMode = 'create';
   };
 
   setHoveringLeftEdge = (isHovering: boolean): void => {
@@ -301,6 +300,8 @@ class IframeLayoutStore {
 
   closeEditModal = (): void => {
     this.editingIframeId = null;
+    this.modalMode = 'create';
+    this.isAddIframeModalOpen = false;
   };
 
   // Drag and drop actions
@@ -431,7 +432,11 @@ class IframeLayoutStore {
   }
 
   get addIframeModalOpen(): boolean {
-    return this.isAddIframeModalOpen;
+    return this.isAddIframeModalOpen || this.editingIframeId !== null;
+  }
+
+  get currentModalMode(): ModalMode {
+    return this.modalMode;
   }
 }
 

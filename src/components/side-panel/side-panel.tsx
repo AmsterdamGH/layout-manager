@@ -2,18 +2,17 @@ import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { X, Pencil, Save } from 'lucide-react';
 import { LayoutSwitcher } from '../layout/layout-switcher';
-import { AddIframeButton } from './add-iframe-button';
 import { EditPresetModal } from '../modals/edit-preset-modal';
 import { PresetSelector } from './preset-selector';
+import { IFrameList } from './iframe-list';
 import { iframeLayoutStore } from '@/stores';
-import type { LayoutMode, AppMode, PresetModalMode } from '@/types/layout';
+import type { LayoutMode, AppMode, ModalMode } from '@/types/layout';
 
 interface SidePanelProps {
   isOpen: boolean;
   onClose: () => void;
   currentMode: LayoutMode;
   onModeChange: (mode: LayoutMode) => void;
-  onAddIframe: () => void;
 }
 
 export const SidePanel = observer(({
@@ -21,12 +20,12 @@ export const SidePanel = observer(({
   onClose,
   currentMode,
   onModeChange,
-  onAddIframe,
 }: SidePanelProps) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editPresetName, setEditPresetName] = useState('');
-  const [modalMode, setModalMode] = useState<PresetModalMode>('create');
+  const [modalMode, setModalMode] = useState<ModalMode>('create');
   const appMode: AppMode = iframeLayoutStore.appMode;
+
   const handlePanelMouseEnter = () => {
     iframeLayoutStore.setHoveringLeftEdge(true);
   };
@@ -119,10 +118,8 @@ export const SidePanel = observer(({
             />
           </div>
 
-          {/* Add Page */}
-          <div className="space-y-2">
-            <AddIframeButton onClick={onAddIframe} />
-          </div>
+          {/* IFrame List */}
+          <IFrameList />
         </div>
 
         {/* Bottom section */}
