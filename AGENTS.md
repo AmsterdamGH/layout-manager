@@ -56,10 +56,11 @@ src/
 │   │   ├── grid-layout.tsx
 │   │   ├── split-layout.tsx
 │   │   └── panel.tsx
+│   ├── side-panel/
+│   │   └── side-panel.tsx
 │   ├── toolbar/
 │   │   ├── toolbar.tsx
-│   │   ├── add-iframe-button.tsx
-│   │   └── layout-switcher.tsx
+│   │   └── add-iframe-button.tsx
 │   ├── modals/
 │   │   ├── add-iframe-modal.tsx
 │   │   └── edit-iframe-modal.tsx

@@ -32,3 +32,12 @@ iframe {
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* Side panel animation */
+.transform-translate-x--full {
+  transform: translateX(-100%);
+}
+
+.transform-translate-x-0 {
+  transform: translateX(0);
+}

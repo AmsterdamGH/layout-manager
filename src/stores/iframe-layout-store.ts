@@ -13,6 +13,9 @@ class IframeLayoutStore {
   isLoading: boolean = false;
   error: string | null = null;
   editingIframeId: string | null = null;
+  isSidePanelOpen: boolean = false;
+  isHoveringLeftEdge: boolean = false;
+  hoverTimeout: ReturnType<typeof setTimeout> | null = null;
   draggedIframeId: string | null = null;
   dragOverIframeId: string | null = null;
 
@@ -44,6 +47,37 @@ class IframeLayoutStore {
   switchLayout = (mode: Layout['mode']): void => {
     this.layout.mode = mode;
     this.saveToStorage();
+  };
+
+  toggleSidePanel = (): void => {
+    this.isSidePanelOpen = !this.isSidePanelOpen;
+  };
+
+  openSidePanel = (): void => {
+    if (this.hoverTimeout) {
+      clearTimeout(this.hoverTimeout);
+      this.hoverTimeout = null;
+    }
+    this.isSidePanelOpen = true;
+  };
+
+  closeSidePanel = (): void => {
+    if (this.hoverTimeout) {
+      clearTimeout(this.hoverTimeout);
+    }
+    this.hoverTimeout = setTimeout(() => {
+      this.isSidePanelOpen = false;
+      this.hoverTimeout = null;
+    }, 300);
+  };
+
+  setHoveringLeftEdge = (isHovering: boolean): void => {
+    this.isHoveringLeftEdge = isHovering;
+    if (isHovering) {
+      this.openSidePanel();
+    } else {
+      this.closeSidePanel();
+    }
   };
 
   editIframe = (id: string): void => {
@@ -143,6 +177,10 @@ class IframeLayoutStore {
 
   get currentMode(): Layout['mode'] {
     return this.layout.mode;
+  }
+
+  get sidePanelOpen(): boolean {
+    return this.isSidePanelOpen;
   }
 }
 

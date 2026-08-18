@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Toolbar } from './components/toolbar/toolbar';
+
+import { HoverZone } from './components/hover-zone';
+import { SidePanel } from './components/side-panel/side-panel';
 import { GridLayout } from './components/layout/grid-layout';
 import { SplitLayout } from './components/layout/split-layout';
 import { AddIframeModal } from './components/modals/add-iframe-modal';
@@ -15,6 +17,10 @@ export const App = observer(() => {
   useEffect(() => {
     iframeLayoutStore.loadFromStorage();
   }, []);
+
+  useEffect(() => {
+    document.title = iframeLayoutStore.orderedIframes.map((i) => i.title).join(' | ') || 'Layout Manager';
+  }, [iframeLayoutStore.orderedIframes]);
 
   const handleAddIframe = (url: string, title: string) => {
     iframeLayoutStore.addIframe({
@@ -41,7 +47,10 @@ export const App = observer(() => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Toolbar
+      <HoverZone />
+      <SidePanel
+        isOpen={iframeLayoutStore.sidePanelOpen}
+        onClose={() => iframeLayoutStore.closeSidePanel()}
         currentMode={iframeLayoutStore.currentMode}
         onModeChange={(mode) => iframeLayoutStore.switchLayout(mode)}
         onAddIframe={() => setIsAddModalOpen(true)}
