@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { Panel } from './panel';
 import { iframeLayoutStore } from '@/stores';
+import type { AppMode } from '@/types/layout';
 
 interface SplitLayoutProps {
   orientation?: 'horizontal' | 'vertical';
@@ -8,6 +9,8 @@ interface SplitLayoutProps {
 
 export const SplitLayout = observer(({ orientation = 'horizontal' }: SplitLayoutProps) => {
   const orderedIframes = iframeLayoutStore.orderedIframes;
+  const appMode: AppMode = iframeLayoutStore.appMode;
+  const isEditMode = appMode === 'edit';
 
   const handleEdit = (id: string) => {
     iframeLayoutStore.editIframe(id);
@@ -31,13 +34,14 @@ export const SplitLayout = observer(({ orientation = 'horizontal' }: SplitLayout
   const containerClass = orientation === 'horizontal' ? 'flex-row' : 'flex-col';
 
   return (
-    <div className={`flex ${containerClass} gap-4 h-full`}>
+    <div className={`flex ${containerClass} gap-2 h-full`}>
       <div className="flex-1 min-w-0">
         <Panel
           iframe={firstIframe}
           className="h-full"
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          isEditMode={isEditMode}
+          onEdit={isEditMode ? handleEdit : undefined}
+          onDelete={isEditMode ? handleDelete : undefined}
         />
       </div>
       {secondIframe && (
@@ -45,8 +49,9 @@ export const SplitLayout = observer(({ orientation = 'horizontal' }: SplitLayout
           <Panel
             iframe={secondIframe}
             className="h-full"
-            onEdit={handleEdit}
-            onDelete={handleDelete}
+            isEditMode={isEditMode}
+            onEdit={isEditMode ? handleEdit : undefined}
+            onDelete={isEditMode ? handleDelete : undefined}
           />
         </div>
       )}

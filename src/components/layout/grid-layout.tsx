@@ -1,10 +1,13 @@
 import { observer } from 'mobx-react-lite';
 import { Panel } from './panel';
 import { iframeLayoutStore } from '@/stores';
+import type { AppMode } from '@/types/layout';
 
 export const GridLayout = observer(() => {
   const orderedIframes = iframeLayoutStore.orderedIframes;
   const count = orderedIframes.length;
+  const appMode: AppMode = iframeLayoutStore.appMode;
+  const isEditMode = appMode === 'edit';
 
   const handleEdit = (id: string) => {
     iframeLayoutStore.editIframe(id);
@@ -37,14 +40,15 @@ export const GridLayout = observer(() => {
   };
 
   return (
-    <div className={`grid ${getGridClass()} gap-4 h-full`}>
+    <div className={`grid ${getGridClass()} gap-2 h-full`}>
       {orderedIframes.map((iframe) => (
         <Panel
           key={iframe.id}
           iframe={iframe}
           className="h-full"
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          isEditMode={isEditMode}
+          onEdit={isEditMode ? handleEdit : undefined}
+          onDelete={isEditMode ? handleDelete : undefined}
         />
       ))}
     </div>

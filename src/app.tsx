@@ -55,14 +55,14 @@ export const App = observer(() => {
         onModeChange={(mode) => iframeLayoutStore.switchLayout(mode)}
         onAddIframe={() => setIsAddModalOpen(true)}
       />
-      
-      <main className="flex-1 p-4 overflow-auto">
+
+      <main className="flex-1 p-2 overflow-auto">
         {iframeLayoutStore.error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700">
             {iframeLayoutStore.error}
           </div>
         )}
-        
+
         {iframeLayoutStore.currentMode === 'grid' && <GridLayout />}
         {iframeLayoutStore.currentMode === 'split-horizontal' && (
           <SplitLayout orientation="horizontal" />

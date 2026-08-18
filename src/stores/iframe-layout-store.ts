@@ -1,11 +1,12 @@
 import { makeAutoObservable } from 'mobx';
-import type { Layout } from '@/types/layout';
+import type { Layout, AppMode } from '@/types/layout';
 import type { Iframe } from '@/types/iframe';
 import { loadFromStorage, saveToStorage, clearStorage } from '@/utils/storage';
 
 class IframeLayoutStore {
   layout: Layout = {
     mode: 'grid',
+    appMode: 'edit',
     iframes: [],
     order: [],
     panelSizes: {},
@@ -46,6 +47,11 @@ class IframeLayoutStore {
 
   switchLayout = (mode: Layout['mode']): void => {
     this.layout.mode = mode;
+    this.saveToStorage();
+  };
+
+  toggleAppMode = (): void => {
+    this.layout.appMode = this.layout.appMode === 'edit' ? 'view' : 'edit';
     this.saveToStorage();
   };
 
@@ -159,6 +165,7 @@ class IframeLayoutStore {
     clearStorage();
     this.layout = {
       mode: 'grid',
+      appMode: 'edit',
       iframes: [],
       order: [],
       panelSizes: {},
@@ -177,6 +184,10 @@ class IframeLayoutStore {
 
   get currentMode(): Layout['mode'] {
     return this.layout.mode;
+  }
+
+  get appMode(): AppMode {
+    return this.layout.appMode;
   }
 
   get sidePanelOpen(): boolean {

@@ -1,9 +1,9 @@
 import { observer } from 'mobx-react-lite';
-import { X } from 'lucide-react';
+import { X, Pencil, Save } from 'lucide-react';
 import { LayoutSwitcher } from '../layout/layout-switcher';
 import { AddIframeButton } from '../toolbar/add-iframe-button';
 import { iframeLayoutStore } from '@/stores';
-import type { LayoutMode } from '@/types/layout';
+import type { LayoutMode, AppMode } from '@/types/layout';
 
 interface SidePanelProps {
   isOpen: boolean;
@@ -20,6 +20,7 @@ export const SidePanel = observer(({
   onModeChange,
   onAddIframe,
 }: SidePanelProps) => {
+  const appMode: AppMode = iframeLayoutStore.appMode;
   const handlePanelMouseEnter = () => {
     iframeLayoutStore.setHoveringLeftEdge(true);
   };
@@ -74,6 +75,18 @@ export const SidePanel = observer(({
           <div className="space-y-2">
             <AddIframeButton onClick={onAddIframe} />
           </div>
+        </div>
+
+        {/* Bottom section */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+          {/* Edit/View Mode Toggle */}
+          <button
+            onClick={() => iframeLayoutStore.toggleAppMode()}
+            className="w-full px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-gray-500 text-white hover:bg-gray-600 flex items-center justify-center"
+            aria-label={appMode === 'edit' ? 'Switch to view mode' : 'Switch to edit mode'}
+          >
+            {appMode === 'edit' ? <Save className="w-5 h-5" /> : <Pencil className="w-5 h-5" />}
+          </button>
         </div>
       </aside>
     </>
