@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import type { Iframe } from '@/types/iframe';
 import { Loading } from '../ui/loading';
 import { iframeLayoutStore } from '@/stores';
-import { Grip, Pencil, Trash2 } from 'lucide-react';
+import { PanelHeader } from './panel-header';
 
 interface PanelProps {
   iframe: Iframe;
@@ -52,49 +52,24 @@ export const Panel = observer(({ iframe, className = '', isEditMode = true, onEd
     setHasError(true);
   };
 
+  if (!isEditMode && !iframe.isVisible) {
+    return null;
+  }
+
   return (
     <div
-      draggable
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      onDragEnd={handleDragEnd}
+      draggable={isEditMode}
+      onDragStart={isEditMode ? handleDragStart : undefined}
+      onDragOver={isEditMode ? handleDragOver : undefined}
+      onDrop={isEditMode ? handleDrop : undefined}
+      onDragEnd={isEditMode ? handleDragEnd : undefined}
       className={`relative overflow-hidden rounded-lg bg-white dark:bg-gray-800 transition-all ${
-        isDragging ? 'opacity-50 cursor-grabbing' : 'cursor-grab'
+        isDragging ? 'opacity-50 cursor-grabbing' : isEditMode ? 'cursor-grab' : 'cursor-default'
       } ${isDragOver ? 'ring-2 ring-blue-600 border-blue-600' : 'border dark:border-gray-700 border-gray-200'} ${className}`}
       role="region"
       aria-label={iframe.title || 'Iframe panel'}
     >
-      {isEditMode && (
-        <div className="absolute top-0 left-0 right-0 z-10 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 border-b border-gray-200 dark:border-gray-600">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Grip className="w-4 h-4 text-gray-400 dark:text-gray-500 cursor-grab" aria-hidden="true" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-200 truncate">{iframe.title}</span>
-            </div>
-            <div className="flex items-center gap-1">
-            {onEdit && (
-              <button
-                onClick={() => onEdit(iframe.id)}
-                className="p-1 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
-                aria-label={`Edit ${iframe.title}`}
-              >
-                <Pencil className="w-4 h-4" />
-              </button>
-            )}
-            {onDelete && (
-              <button
-                onClick={() => onDelete(iframe.id)}
-                className="p-1 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
-                aria-label={`Delete ${iframe.title}`}
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            )}
-            </div>
-          </div>
-        </div>
-      )}
+      <PanelHeader iframe={iframe} isEditMode={isEditMode} onEdit={onEdit} onDelete={onDelete} />
       <div className={`${isEditMode ? 'pt-8' : ''} h-full`}>
         {isLoading && <Loading size="sm" text="Loading..." />}
         {hasError && (

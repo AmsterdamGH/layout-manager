@@ -166,6 +166,15 @@ class IframeLayoutStore {
     }
   };
 
+  toggleVisibility = (id: string): void => {
+    const iframe = this.layout.preset.iframes.find((i) => i.id === id);
+    if (iframe) {
+      iframe.isVisible = !iframe.isVisible;
+      this.syncPreset();
+      this.saveToStorage();
+    }
+  };
+
   switchLayout = (mode: Preset['mode']): void => {
     this.layout.preset.mode = mode;
     this.preset.mode = mode;
@@ -465,7 +474,7 @@ class IframeLayoutStore {
   get orderedIframes(): Iframe[] {
     return this.layout.preset.order
       .map((id) => this.layout.preset.iframes.find((i) => i.id === id))
-      .filter((iframe): iframe is Iframe => iframe !== undefined && iframe.isVisible);
+      .filter((iframe): iframe is Iframe => iframe !== undefined);
   }
 
   get currentMode(): Preset['mode'] {

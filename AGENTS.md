@@ -55,7 +55,8 @@ src/
 │   │   ├── layout-switcher.tsx
 │   │   ├── grid-layout.tsx
 │   │   ├── split-layout.tsx
-│   │   └── panel.tsx
+│   │   ├── panel.tsx
+│   │   └── panel-header.tsx
 │   ├── side-panel/
 │   │   ├── side-panel.tsx
 │   │   ├── preset-selector.tsx
@@ -101,10 +102,11 @@ src/
 - Add iframes with URL and optional title
 - Edit iframe URLs and titles
 - Remove iframes
-- Toggle iframe visibility
+- Toggle iframe visibility (via Eye/EyeOff button in panel header and iframe list)
 - Load iframe with loading/error states
 - Unified modal for adding and editing iframes (EditIframeModal)
-- IFrameList component in side panel for managing iframes
+- IFrameList component in side panel for managing iframes (shows all iframes, including hidden ones)
+- Panel component shows all panels in edit mode
 
 ### 2. Layout Modes
 - **Grid:** Equal-sized panels in a grid
@@ -112,10 +114,11 @@ src/
 - **Vertical:** Panels arranged vertically (stacked)
 
 ### 3. Drag and Drop Reordering
-- Drag panels using the grip handle (⋮⋮)
+- Drag panels using the grip handle (⋮⋮) in edit mode only
 - Visual feedback during drag operations
 - Drop zones highlighted with blue ring
 - Order persisted to localStorage
+- Panels are not draggable in view mode
 
 ### 4. Persistence
 - Auto-save to localStorage on changes
@@ -173,6 +176,8 @@ src/
 - **Add page button:** Has text caption "Add Page" next to Plus icon
 - **Preset actions:** Inline in combobox (dropdown mode) or on each item (listbox mode)
 - **Import preset button:** Located next to New preset button in PresetSelector
+- **IFrame list:** Displays all iframes (including hidden ones) with visibility toggle button on each item
+- **Panel header:** Visible in both view and edit modes; shows grip icon and action buttons only in edit mode
 
 ## Icons
 
@@ -187,7 +192,7 @@ The application uses Lucide React icons for consistent iconography:
 | `Pencil`, `Save` | Edit mode toggle |
 | `X` | Close buttons |
 | `Loader2` | Loading states |
-| `Grip`, `Pencil`, `Trash2` | Panel actions |
+| `Grip`, `Pencil`, `Trash2`, `Eye`, `EyeOff` | Panel header actions |
 | `Copy` | Clone preset button |
 | `ChevronDown` | Dropdown toggle |
 | `Sun`, `Moon` | Theme toggle (side panel header) |
@@ -286,9 +291,10 @@ class IframeLayoutStore {
   @action closeEditPresetModal(): void;
   @action openImportPresetModal(): void;
   @action closeImportPresetModal(): void;
+  @action toggleVisibility(id: string): void;
   
   // Private methods
-  private normalizePresetName(name: string): string;
+  private deduplicatePresetName(name: string): string;
 }
 ```
 
