@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { iframeLayoutStore, modalStore } from '@/stores';
+import { iframeLayoutStore, modalStore, presetStore } from '@/stores';
 import { observer } from 'mobx-react-lite';
 import { Plus, ChevronDown, Upload } from 'lucide-react';
 import { PresetActions } from './preset-actions';
@@ -9,7 +9,7 @@ const MAX_LISTBOX_PRESETS = 5;
 
 export const PresetSelector = observer(() => {
   const [isOpen, setIsOpen] = useState(false);
-  const presets = iframeLayoutStore.presetList;
+  const presets = presetStore.getPresetList();
   const currentPresetId = iframeLayoutStore.currentPresetId;
   const isListbox = presets.length < MAX_LISTBOX_PRESETS;
 
@@ -36,7 +36,7 @@ export const PresetSelector = observer(() => {
   };
 
   const handleSelect = (presetId: string) => {
-    iframeLayoutStore.switchPreset(presetId);
+    iframeLayoutStore.selectPreset(presetId);
     setIsOpen(false);
   };
 

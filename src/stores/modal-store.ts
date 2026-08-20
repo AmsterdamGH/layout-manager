@@ -2,6 +2,7 @@ import { makeAutoObservable } from 'mobx';
 import type { ModalMode, Preset } from '@/types/layout';
 import type { Iframe } from '@/types/iframe';
 import { iframeLayoutStore } from './iframe-layout-store';
+import { presetStore } from './preset-store';
 
 class ModalStore {
   isEditIframeModalOpen: boolean = false;
@@ -20,7 +21,7 @@ class ModalStore {
   }
 
   // Iframe modal actions
-  openEditIframeModal(mode: 'create' | 'edit' = 'create', id?: string): void {
+  openEditIframeModal(mode: ModalMode = 'edit', id?: string): void {
     this.isEditIframeModalOpen = true;
     this.iframeModalMode = mode;
     if (id) {
@@ -38,39 +39,6 @@ class ModalStore {
   get editingIframe(): Iframe | null {
     if (!this.editingIframeId) return null;
     return iframeLayoutStore.getIFrameById(this.editingIframeId) || null;
-  }
-
-  // Iframe actions
-  updateIframe(url: string, title: string): void {
-    if (this.editingIframe) {
-      iframeLayoutStore.updateIframe(this.editingIframe.id, { url, title });
-    }
-  }
-
-  addIframe(url: string, title: string): void {
-    iframeLayoutStore.addIframe({
-      id: crypto.randomUUID(),
-      url,
-      title,
-      isVisible: true,
-      headerVisible: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-  }
-
-  // Preset actions
-  updatePreset(name: string, mode: Preset['mode']): void {
-    const preset = iframeLayoutStore.presets.get(this.editingPresetId!);
-    if (preset) {
-      preset.name = name;
-      preset.mode = mode;
-      iframeLayoutStore.savePresets();
-    }
-  }
-
-  addPreset(name: string, mode: Preset['mode']): void {
-    iframeLayoutStore.createPreset(name, { mode });
   }
 
   // Preset modal actions
@@ -91,7 +59,7 @@ class ModalStore {
   // Getters
   get editingPreset(): Preset | null {
     if (!this.editingPresetId) return null;
-    return iframeLayoutStore.presets.get(this.editingPresetId) || null;
+    return presetStore.getPresetById(this.editingPresetId) || null;
   }
 
   openImportPresetModal(): void {
@@ -151,10 +119,6 @@ class ModalStore {
 
   get deletePresetModalOpen(): boolean {
     return this.isDeletePresetModalOpen;
-  }
-
-  get currentModalMode(): ModalMode {
-    return this.iframeModalMode;
   }
 }
 

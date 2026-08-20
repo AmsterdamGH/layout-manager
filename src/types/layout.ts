@@ -8,12 +8,11 @@ export interface Preset {
   id: string;
   name: string;
   mode: LayoutMode;
-  iframes: Iframe[];
+  iframes: Record<string, Iframe>;
   order: string[];
 }
 
 export interface Layout {
   appMode: AppMode;
-  preset: Preset;
   presetId: string | null;
 }

@@ -1,7 +1,13 @@
-import { useState, useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
-import { X } from 'lucide-react';
-import { modalStore } from '@/stores';
+import {
+  iframeLayoutStore,
+  modalStore,
+} from '@/stores'
+import { X } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
+import {
+  useEffect,
+  useState,
+} from 'react'
 
 export const EditIframeModal = observer(() => {
   const [url, setUrl] = useState('');
@@ -19,8 +25,6 @@ export const EditIframeModal = observer(() => {
   if (!modalStore.editIframeModalOpen) return null;
 
   const titleText = modalStore.iframeModalMode === 'edit' ? 'Edit Page' : 'Add Page';
-  const submitLabel = modalStore.iframeModalMode === 'edit' ? 'Save Changes' : 'Add Page';
-
   const handleClose = () => {
     modalStore.closeEditIframeModal();
   };
@@ -30,9 +34,17 @@ export const EditIframeModal = observer(() => {
     if (url.trim() && title.trim()) {
       try {
         if (modalStore.editingIframe) {
-          modalStore.updateIframe(url.trim(), title.trim());
+          iframeLayoutStore.updateIframe(modalStore.editingIframe.id, { url: url.trim(), title: title.trim() });
         } else {
-          modalStore.addIframe(url.trim(), title.trim());
+          iframeLayoutStore.addIframe({
+            id: `iframe-${new Date()}`,
+            url: url.trim(),
+            title: title.trim(),
+            isVisible: true,
+            headerVisible: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
         }
         modalStore.closeEditIframeModal();
       } catch (err) {
@@ -106,7 +118,7 @@ export const EditIframeModal = observer(() => {
               disabled={!url.trim() || !title.trim()}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitLabel}
+              {'Save'}
             </button>
           </div>
         </form>

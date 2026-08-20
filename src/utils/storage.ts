@@ -1,29 +1,31 @@
-import type { Layout } from '@/types/layout';
-import { STORAGE_KEY } from './constants';
+import { debounce } from './debounce';
+import { SAVE_DEBOUNCE_MS } from './constants';
 
-export const saveToStorage = (data: Layout): void => {
+const get = <T>(key: string): T | null => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch (error) {
-    console.error('Failed to save to localStorage:', error);
-  }
-};
-
-export const loadFromStorage = (): Layout | null => {
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
+    const data = localStorage.getItem(key);
     if (!data) return null;
-    return JSON.parse(data) as Layout;
+    return JSON.parse(data) as T;
   } catch (error) {
-    console.error('Failed to load from localStorage:', error);
+    console.error(`Failed to load from localStorage (${key}):`, error);
     return null;
   }
 };
 
-export const clearStorage = (): void => {
+const set = debounce((key: string, data: unknown) => {
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.setItem(key, JSON.stringify(data));
   } catch (error) {
-    console.error('Failed to clear localStorage:', error);
+    console.error(`Failed to save to localStorage (${key}):`, error);
+  }
+}, SAVE_DEBOUNCE_MS);
+
+const remove = (key: string): void => {
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {
+    console.error(`Failed to clear localStorage (${key}):`, error);
   }
 };
+
+export { get, set, remove };

@@ -1,14 +1,28 @@
-import { useState, useEffect } from 'react';
-import { iframeLayoutStore, modalStore } from '@/stores';
-import { observer } from 'mobx-react-lite';
-import { X, AlertTriangle } from 'lucide-react';
+import {
+  iframeLayoutStore,
+  modalStore,
+  presetStore,
+} from '@/stores'
+import {
+  AlertTriangle,
+  X,
+} from 'lucide-react'
+import { observer } from 'mobx-react-lite'
+import {
+  useEffect,
+  useState,
+} from 'react'
+import {
+  removeHashPreset,
+  setHashPreset,
+} from '../../utils/hash.ts'
 
-export const DeletePresetModal = observer(() => {
+const DeletePresetModal = observer(() => {
   const [presetName, setPresetName] = useState('');
 
   useEffect(() => {
     if (modalStore.deletePresetModalOpen && modalStore.deletePresetId) {
-      const preset = iframeLayoutStore.presetList.find((p) => p.id === modalStore.deletePresetId);
+      const preset = presetStore.getPresetById(modalStore.deletePresetId);
       setPresetName(preset?.name || 'Unknown');
     }
   }, [modalStore.deletePresetModalOpen, modalStore.deletePresetId]);
@@ -16,10 +30,14 @@ export const DeletePresetModal = observer(() => {
   if (!modalStore.deletePresetModalOpen) return null;
 
   const handleDelete = () => {
-    if (modalStore.deletePresetId) {
-      iframeLayoutStore.deletePreset(modalStore.deletePresetId);
-      modalStore.closeDeletePresetModal();
+    if (!modalStore.deletePresetId) {
+      return
     }
+    presetStore.deletePreset(modalStore.deletePresetId)
+    if (iframeLayoutStore.presetId === modalStore.deletePresetId) {
+      iframeLayoutStore.preset = presetStore.getPresetList()[0]
+    }
+    modalStore.closeDeletePresetModal()
   };
 
   const handleClose = () => {
@@ -65,3 +83,4 @@ export const DeletePresetModal = observer(() => {
     </div>
   );
 });
+export default DeletePresetModal

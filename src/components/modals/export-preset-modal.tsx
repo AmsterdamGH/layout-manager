@@ -1,7 +1,15 @@
-import { useState } from 'react';
-import { iframeLayoutStore, modalStore } from '@/stores';
-import { observer } from 'mobx-react-lite';
-import { X, Copy, Check, Download } from 'lucide-react';
+import {
+  iframeLayoutStore,
+  modalStore,
+} from '@/stores'
+import {
+  Check,
+  Copy,
+  Download,
+  X,
+} from 'lucide-react'
+import { observer } from 'mobx-react-lite'
+import { useState } from 'react'
 
 export const ExportPresetModal = observer(() => {
   const [copied, setCopied] = useState(false);
@@ -27,7 +35,25 @@ export const ExportPresetModal = observer(() => {
   };
 
   const handleDownload = () => {
-    iframeLayoutStore.downloadPreset();
+    const preset = iframeLayoutStore.preset;
+    if (!preset) {
+      return;
+    }
+    const presetData = {
+      name: preset.name,
+      mode: preset.mode,
+      iframes: preset.iframes,
+      order: preset.order,
+    };
+    const blob = new Blob([JSON.stringify(presetData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${preset.name.replace(/\s+/g, '-').toLowerCase()}-preset.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const handleClose = () => {

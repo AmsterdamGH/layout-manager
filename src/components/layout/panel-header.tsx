@@ -1,6 +1,5 @@
 import { Tooltip } from '@/components/ui/tooltip'
-import { iframeLayoutStore } from '@/stores'
-import { modalStore } from '@/stores'
+import { iframeLayoutStore, modalStore } from '@/stores'
 import type { Iframe } from '@/types/iframe'
 import {
   CreditCard,

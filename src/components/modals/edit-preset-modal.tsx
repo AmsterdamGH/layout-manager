@@ -1,7 +1,14 @@
-import { useState, useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
-import { X } from 'lucide-react';
-import { modalStore } from '@/stores';
+import {
+  iframeLayoutStore,
+  modalStore,
+  presetStore,
+} from '@/stores'
+import { X } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
+import {
+  useEffect,
+  useState,
+} from 'react'
 
 export const EditPresetModal = observer(() => {
   const [name, setName] = useState(() => modalStore.editingPreset?.name || '');
@@ -29,11 +36,16 @@ export const EditPresetModal = observer(() => {
     if (name.trim()) {
       try {
         if (currentMode === 'edit' && modalStore.editingPresetId) {
-          modalStore.updatePreset(name.trim(), modalStore.editingPreset?.mode || 'layout-grid');
+          const preset = presetStore.presets.get(modalStore.editingPresetId!);
+          if (preset) {
+            preset.name = name.trim();
+            preset.mode = modalStore.editingPreset?.mode || 'layout-grid';
+            presetStore.savePresets();
+          }
         } else if (currentMode === 'clone' && modalStore.editingPresetId) {
-          modalStore.addPreset(name.trim(), modalStore.editingPreset?.mode || 'layout-grid');
+          iframeLayoutStore.preset = presetStore.createPreset(name.trim(), { mode: modalStore.editingPreset?.mode || 'layout-grid' });
         } else if (currentMode === 'create') {
-          modalStore.addPreset(name.trim(), 'layout-grid');
+          iframeLayoutStore.preset = presetStore.createPreset(name.trim(), { mode: 'layout-grid' });
         }
         modalStore.closeEditPresetModal();
         setName('');

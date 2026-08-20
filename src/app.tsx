@@ -8,15 +8,12 @@ import { EditIframeModal } from './components/modals/edit-iframe-modal';
 import { EditPresetModal } from './components/modals/edit-preset-modal';
 import { ExportPresetModal } from './components/modals/export-preset-modal';
 import { ImportPresetModal } from './components/modals/import-preset-modal';
-import { DeletePresetModal } from './components/modals/delete-preset-modal';
-import { Loading } from './components/ui/loading';
-import { iframeLayoutStore } from './stores';
-import { modalStore } from './stores/modal-store';
+import DeletePresetModal from './components/modals/delete-preset-modal';
+import { iframeLayoutStore, modalStore } from './stores';
 
 
 export const App = observer(() => {
   useEffect(() => {
-    iframeLayoutStore.loadFromStorage();
     return () => {
       iframeLayoutStore.dispose();
     };
@@ -42,10 +39,6 @@ export const App = observer(() => {
     document.title = iframeLayoutStore.orderedIframes.map((i) => i.title).join(' | ') || 'Layout Manager';
   }, [iframeLayoutStore.orderedIframes]);
 
-  if (iframeLayoutStore.isLoading) {
-    return <Loading text="Loading layout..." />;
-  }
-
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
       <SidePanel
@@ -56,11 +49,6 @@ export const App = observer(() => {
       />
 
       <main className="flex-1 p-2 overflow-auto">
-        {iframeLayoutStore.error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 dark:bg-red-900/50 dark:border-red-800 dark:text-red-200">
-            {iframeLayoutStore.error}
-          </div>
-        )}
 
         {iframeLayoutStore.currentMode === 'layout-grid' && <GridLayout />}
         {iframeLayoutStore.currentMode === 'layout-horizontal' && (

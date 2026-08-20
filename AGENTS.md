@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A React application for managing a dynamic layout of iframes with multiple layout modes, drag-and-drop reordering, persistent state storage, preset management with location hash support, export/import functionality, and a dark theme with toggle. The application starts in view mode by default.
+A React application for managing a dynamic layout of iframes with multiple layout modes, drag-and-drop reordering, preset management with location hash support, export/import functionality, and a dark theme with toggle. The application starts in view mode by default.
 
 ## Tech Stack
 
@@ -11,7 +11,7 @@ A React application for managing a dynamic layout of iframes with multiple layou
 - **State Management:** MobX
 - **Styling:** Tailwind CSS
 - **Icons:** Lucide React
-- **Persistence:** localStorage
+
 - **Build Tool:** Vite
 
 ## Naming Conventions
@@ -22,11 +22,11 @@ A React application for managing a dynamic layout of iframes with multiple layou
 | **Function Names** | lower camelCase | `addIframe()`, `removeIframe()` |
 | **Class Names** | PascalCase | `IframeLayoutStore`, `Panel` |
 | **Interfaces/Types** | PascalCase | `Iframe`, `Layout` |
-| **Variables** | lower camelCase | `iframeList`, `isLoading` |
-| **Constants** | UPPER_SNAKE_CASE | `MAX_IFRAMES`, `STORAGE_KEY` |
+| **Variables** | lower camelCase | `iframeList`, `isOpen` |
+| **Constants** | UPPER_SNAKE_CASE | `PRESETS_KEY` |
 | **Props** | lower camelCase | `iframeUrl`, `panelSize` |
 | **State Variables** | lower camelCase | `isOpen`, `selectedIframe` |
-| **Hooks** | use + PascalCase prefix | `useLocalStorage`, `useDebounce` |
+| **Hooks** | use + PascalCase prefix | `useDebounce` |
 | **CSS Classes** | kebab-case | `iframe-panel`, `toolbar-item` |
 
 ## Architecture
@@ -38,12 +38,10 @@ A React application for managing a dynamic layout of iframes with multiple layou
 │           Store (MobX)              │
 ├─────────────────────────────────────┤
 │  - iframe-layout-store              │
-│  - iframe-store                     │
+│  - modal-store                      │
+│  - preset-store                     │
+│  - theme-store                      │
 └─────────────────────────────────────┘
-              ↓
-    ┌─────────────────────┐
-    │  localStorage       │
-    └─────────────────────┘
 ```
 
 ### Folder Structure
@@ -58,12 +56,13 @@ src/
 │   │   ├── panel.tsx
 │   │   └── panel-header.tsx
 │   ├── side-panel/
-│   │   ├── side-panel.tsx
-│   │   ├── preset-selector.tsx
-│   │   ├── preset-actions.tsx
+│   │   ├── add-iframe-button.tsx
 │   │   ├── iframe-list.tsx
-│   │   └── page-list.tsx
+│   │   ├── preset-actions.tsx
+│   │   ├── preset-selector.tsx
+│   │   └── side-panel.tsx
 │   ├── modals/
+│   │   ├── delete-preset-modal.tsx
 │   │   ├── edit-iframe-modal.tsx
 │   │   ├── edit-preset-modal.tsx
 │   │   ├── export-preset-modal.tsx
@@ -75,7 +74,8 @@ src/
 │       └── tooltip.tsx
 ├── stores/
 │   ├── iframe-layout-store.ts
-│   ├── iframe-store.ts
+│   ├── modal-store.ts
+│   ├── preset-store.ts
 │   ├── theme-store.ts
 │   └── index.ts
 ├── providers/
@@ -88,11 +88,12 @@ src/
 │   ├── iframe.ts
 │   └── layout.ts
 ├── utils/
-│   ├── storage.ts
-│   ├── validation.ts
 │   ├── constants.ts
+│   ├── debounce.ts
 │   ├── hash.ts
-│   └── validate-preset.ts
+│   ├── storage.ts
+│   ├── validate-preset.ts
+│   └── validation.ts
 ├── app.tsx
 └── main.tsx
 ```
@@ -122,12 +123,6 @@ src/
 - Order persisted to localStorage
 - Panels are not draggable in view mode
 
-### 4. Persistence
-- Auto-save to localStorage on changes
-- Load saved layout on initialization
-- Debounced saves (500ms)
-- Error handling for localStorage
-
 ### 5. Presets
 - Save multiple layout configurations (presets) with different iframes and modes
 - Switch between presets via dropdown selector (or listbox when ≤5 presets)
@@ -137,7 +132,7 @@ src/
 - Create new presets with empty layout
 - Import presets from JSON files via modal (Paste JSON or Upload File)
 - Export presets as JSON files
-- Presets stored in localStorage under key `'presets'`
+- Presets stored in localStorage under key `'layout-manager-presets'`
 - **PresetActions component:** Reusable component for preset action buttons (Delete, Clone, Edit) used in both dropdown and listbox views
 - **Action button order:** Delete, Clone, Edit
 - **Dropdown mode:** Action buttons appear inside the combobox after the chevron
@@ -145,6 +140,8 @@ src/
 - **Import preset modal:** Opens via Import button next to New preset button
 - **Duplicate handling:** Appends `-{timestamp}` suffix for duplicate names (case-sensitive)
 - **Validation:** Preset data validated on import (name, mode, iframes, order)
+- **Preset Store:** Dedicated store (`preset-store.ts`) handles all preset CRUD operations
+- **Iframe Storage:** Iframes stored as `Record<string, Iframe>` object for efficient lookups
 
 ### 6. Location Hash Support
 - Current preset reflected in URL hash using preset name (e.g., `#preset=My-Preset`)
@@ -152,6 +149,7 @@ src/
 - Browser back/forward buttons work correctly
 - Hash validated on load - invalid presets are ignored
 - On first load with no hash, a default preset is created and hash is set
+- Hash management handled by layout store, not preset store
 
 ### 7. Dark Theme
 - Toggle between light and dark themes via button in side panel header
@@ -170,6 +168,7 @@ src/
   - **Upload File:** Click-to-upload area for selecting a JSON file
 - Import validation checks preset structure (name, mode, iframes, order)
 - Duplicate preset names handled automatically with `-{timestamp}` suffix
+- **Preset Storage Format:** Stores both `presets` array and `iframes` array separately in localStorage
 
 ### 9. Side Panel Behavior
 - Panel opens/closes via ESC key toggle
@@ -180,6 +179,7 @@ src/
 - **Import preset button:** Located next to New preset button in PresetSelector
 - **IFrame list:** Displays all iframes (including hidden ones) with visibility toggle button on each item
 - **Panel header:** Visible in both view and edit modes; shows grip icon and action buttons only in edit mode
+- **Preset Selector:** Uses `presetStore.getPresetList()` for dropdown options
 
 ### 10. Tooltip Component
 - Reusable tooltip component (`src/components/ui/tooltip.tsx`) using `createPortal`
@@ -190,12 +190,13 @@ src/
 
 ### 11. Modal Store Architecture
 - Modal store (`src/stores/modal-store.ts`) manages all modal UI state
+- Modal store delegates preset actions to `presetStore`
 
 ### 12. Header Visibility Toggle
 - Toggle button in panel header to show/hide header in edit mode
 - Header is always visible in edit mode (regardless of `headerVisible` property)
 - Uses `RectangleHorizontal` icon to hide header, `CreditCard` to show header
-- `headerVisible` property added to `Iframe` interface with migration for existing iframes
+- `headerVisible` property added to `Iframe` interface
 
 ## Icons
 
@@ -232,22 +233,13 @@ interface Iframe {
 }
 ```
 
-### Layout
-```typescript
-interface Layout {
-  appMode: 'edit' | 'view';
-  preset: Preset;
-  presetId: string | null;
-}
-```
-
 ### Preset
 ```typescript
 interface Preset {
   id: string;
   name: string;
   mode: 'layout-grid' | 'layout-horizontal' | 'layout-vertical';
-  iframes: Iframe[];
+  iframes: Record<string, Iframe>;
   order: string[];
 }
 ```
@@ -257,14 +249,11 @@ interface Preset {
 ### iframe-layout-store
 ```typescript
 class IframeLayoutStore {
-  preset: Preset = { id: 'default', name: 'Default', mode: 'layout-grid', iframes: [], order: [] };
-  layout: Layout = { appMode: 'view', preset: this.preset, presetId: null };
-  presets: Map<string, Preset> = new Map();
-  isLoading: boolean = false;
-  error: string | null = null;
+  appMode: AppMode = 'view';
+  presetId: string | null = null;
+  isSidePanelOpen: boolean = false;
   draggedIframeId: string | null = null;
   dragOverIframeId: string | null = null;
-  isSidePanelOpen: boolean = false;
   
   // Actions
   @action addIframe(iframe: Iframe): void;
@@ -275,42 +264,52 @@ class IframeLayoutStore {
   @action dragOver(id: string): void;
   @action drop(targetId: string): void;
   @action endDrag(): void;
-  @action loadFromStorage(): void;
-  @action saveToStorage(): void;
-  @action clearStorage(): void;
-  @action createPreset(name: string, initialPreset?: Partial<Preset>): string;
-  @action switchPreset(presetId: string): void;
-  @action deletePreset(presetId: string): void;
-  @action clonePreset(sourceId: string, newName: string): string;
-  @action editPresetName(presetId: string, newName: string): void;
+  @action selectPreset(presetId: string): void;
   @action toggleAppMode(): void;
   @action openSidePanel(): void;
   @action closeSidePanel(): void;
-  @action exportPreset(): string;
-  @action downloadPreset(): void;
   @action toggleVisibility(id: string): void;
   @action toggleHeaderVisibility(id: string): void;
-  @action savePresets(): void;
   
   // Getters
   get orderedIframes(): Iframe[];
-  get iframeById(): Map<string, Iframe>;
+  get currentMode(): Preset['mode'];
   getIFrameById(id: string): Iframe | undefined;
+  get preset(): Preset | undefined;
+  get sidePanelOpen(): boolean;
+  get exportedJson(): string;
+  get currentPresetId(): string | null;
   
   // Private methods
-  private deduplicatePresetName(name: string): string;
+  private initializeFromHash(): void;
+  private handleHashChange(): void;
 }
 ```
 
-### iframe-store
+### preset-store
 ```typescript
-class IframeStore {
-  @observable iframes: Map<string, Iframe> = new Map();
+class PresetStore {
+  presets: Map<string, Preset> = new Map();
   
-  @action addIframe(iframe: Iframe): void;
-  @action updateIframe(id: string, updates: Partial<Iframe>): void;
-  @action removeIframe(id: string): void;
-  @action toggleVisibility(id: string): void;
+  // Actions
+  @action createPreset(name: string, initialPreset?: Partial<Preset>): Preset;
+  @action deletePreset(presetId: string): void;
+  @action clonePreset(sourceId: string, newName: string): Preset;
+  @action editPresetName(presetId: string, newName: string): void;
+  @action updateIframe(presetId: string, iframeId: string, updates: Partial<Iframe>): void;
+  @action removeIframe(presetId: string, iframeId: string): void;
+  @action toggleIframeVisibility(presetId: string, iframeId: string): void;
+  @action toggleIframeHeaderVisibility(presetId: string, iframeId: string): void;
+  @action addIframe(presetId: string, iframe: Iframe): void;
+  @action savePresets(): void;
+  @action createDefaultPreset(): Preset;
+  @action clearPresets(): void;
+  
+  // Getters
+  getPresetById(id: string): Preset | undefined;
+  getPresetByName(name: string): Preset | undefined;
+  getPresetList(): Preset[];
+  getIframeByPresetId(presetId: string, iframeId: string): Iframe | undefined;
 }
 ```
 
@@ -329,17 +328,17 @@ class ModalStore {
   deletePresetId: string | null = null;
   
   // Actions
-  @action openEditIframeModal(mode: 'create' | 'edit', id?: string): void;
+  @action openEditIframeModal(mode: ModalMode, id?: string): void;
   @action closeEditIframeModal(): void;
   @action openEditPresetModal(mode: ModalMode, presetId?: string): void;
   @action closeEditPresetModal(): void;
   @action openDeletePresetModal(presetId: string): void;
   @action closeDeletePresetModal(): void;
+  @action openImportPresetModal(): void;
+  @action closeImportPresetModal(): void;
+  @action openExportPresetModal(): void;
+  @action closeExportPresetModal(): void;
   @action closeAllModals(): void;
-  @action updateIframe(url: string, title: string): void;
-  @action addIframe(url: string, title: string): void;
-  @action updatePreset(name: string, mode: Preset['mode']): void;
-  @action addPreset(name: string, mode: Preset['mode']): void;
   
   // Getters
   get editingIframe(): Iframe | null;
@@ -351,7 +350,6 @@ class ModalStore {
   get exportPresetModalOpen(): boolean;
   get importPresetModalOpen(): boolean;
   get deletePresetModalOpen(): boolean;
-  get currentModalMode(): ModalMode;
 }
 ```
 

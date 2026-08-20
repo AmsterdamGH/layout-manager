@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback } from 'react';
-import { iframeLayoutStore, modalStore } from '@/stores';
+import { modalStore, presetStore } from '@/stores';
 import { observer } from 'mobx-react-lite';
 import { X, Upload, Code, Loader2 } from 'lucide-react';
 import { validatePreset } from '@/utils/validate-preset';
+import { setHashPreset } from '@/utils/hash';
 
 type ImportMode = 'text' | 'file';
 
@@ -30,7 +31,8 @@ export const ImportPresetModal = observer(() => {
       }
 
       const name = parsed.name ?? `Imported-${Date.now()}`;
-      iframeLayoutStore.createPreset(name, parsed);
+      const preset = presetStore.createPreset(name, parsed);
+      setHashPreset(preset.name);
       modalStore.closeImportPresetModal();
       setJsonInput('');
       setError(null);
@@ -61,7 +63,8 @@ export const ImportPresetModal = observer(() => {
         }
 
         const name = parsed.name ?? `Imported-${Date.now()}`;
-        iframeLayoutStore.createPreset(name, parsed);
+        const preset = presetStore.createPreset(name, parsed);
+        setHashPreset(preset.name);
         modalStore.closeImportPresetModal();
         setError(null);
       } catch (err) {
