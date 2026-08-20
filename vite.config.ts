@@ -22,4 +22,5 @@ export default defineConfig({
     port: 3000,
     open: process.env.VITE_APP_BROWSER || false,
   },
+  base: '/layout-manager/'
 });
