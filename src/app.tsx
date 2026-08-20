@@ -5,8 +5,13 @@ import { SidePanel } from './components/side-panel/side-panel';
 import { GridLayout } from './components/layout/grid-layout';
 import { SplitLayout } from './components/layout/split-layout';
 import { EditIframeModal } from './components/modals/edit-iframe-modal';
+import { EditPresetModal } from './components/modals/edit-preset-modal';
+import { ExportPresetModal } from './components/modals/export-preset-modal';
+import { ImportPresetModal } from './components/modals/import-preset-modal';
+import { DeletePresetModal } from './components/modals/delete-preset-modal';
 import { Loading } from './components/ui/loading';
 import { iframeLayoutStore } from './stores';
+import { modalStore } from './stores/modal-store';
 
 
 export const App = observer(() => {
@@ -18,25 +23,24 @@ export const App = observer(() => {
   }, []);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (modalStore.isAnyModalOpen) {
+          modalStore.closeAllModals();
+        } else if (iframeLayoutStore.sidePanelOpen) {
+          iframeLayoutStore.closeSidePanel();
+        } else {
+          iframeLayoutStore.openSidePanel();
+        }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
     document.title = iframeLayoutStore.orderedIframes.map((i) => i.title).join(' | ') || 'Layout Manager';
   }, [iframeLayoutStore.orderedIframes]);
-
-  const handleSaveIframe = (id: string, url: string, title: string) => {
-    const existingIframe = iframeLayoutStore.orderedIframes.find((i) => i.id === id);
-    if (existingIframe) {
-      iframeLayoutStore.updateIframe(id, { url, title });
-    } else {
-      iframeLayoutStore.addIframe({
-        id,
-        url,
-        title,
-        isVisible: true,
-        headerVisible: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    }
-  };
 
   if (iframeLayoutStore.isLoading) {
     return <Loading text="Loading layout..." />;
@@ -67,13 +71,11 @@ export const App = observer(() => {
         )}
       </main>
 
-      <EditIframeModal
-        iframe={iframeLayoutStore.editingIframeId ? iframeLayoutStore.orderedIframes.find((i) => i.id === iframeLayoutStore.editingIframeId) || null : null}
-        isOpen={!!iframeLayoutStore.editingIframeId || iframeLayoutStore.isAddIframeModalOpen}
-        onClose={() => iframeLayoutStore.closeEditModal()}
-        onSave={handleSaveIframe}
-        mode={iframeLayoutStore.currentModalMode}
-      />
+      <EditIframeModal />
+      <EditPresetModal />
+      <ExportPresetModal />
+      <ImportPresetModal />
+      <DeletePresetModal />
     </div>
   );
 });

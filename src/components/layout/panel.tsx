@@ -8,12 +8,10 @@ import { PanelHeader } from './panel-header';
 interface PanelProps {
   iframe: Iframe;
   className?: string;
-  isEditMode?: boolean;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
 }
 
-export const Panel = observer(({ iframe, className = '', isEditMode = true, onEdit, onDelete }: PanelProps) => {
+export const Panel = observer(({ iframe, className = '' }: PanelProps) => {
+  const isEditMode = iframeLayoutStore.appMode === 'edit';
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -67,14 +65,14 @@ export const Panel = observer(({ iframe, className = '', isEditMode = true, onEd
         isDragging ? 'opacity-50 cursor-grabbing' : isEditMode ? 'cursor-grab' : 'cursor-default'
       } ${isDragOver ? 'ring-2 ring-blue-600 border-blue-600' : 'border dark:border-gray-700 border-gray-200'} ${className}`}
       role="region"
-      aria-label={iframe.title || 'Iframe panel'}
+      aria-label={iframe.title || 'Page panel'}
     >
-      {(isEditMode || iframe.headerVisible) && <PanelHeader iframe={iframe} isEditMode={isEditMode} onEdit={onEdit} onDelete={onDelete} />}
+      {(isEditMode || iframe.headerVisible) && <PanelHeader iframe={iframe} />}
       <div className={`h-full ${isEditMode || iframe.headerVisible ? 'pt-8' : ''}`}>
         {isLoading && <Loading size="sm" text="Loading..." />}
         {hasError && (
           <div className="flex items-center justify-center h-full text-red-500">
-            Failed to load iframe
+            Failed to load page
           </div>
         )}
         <iframe

@@ -1,49 +1,49 @@
 import { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { X } from 'lucide-react';
-import type { ModalMode } from '@/types/layout';
+import { modalStore } from '@/stores';
 
-interface EditPresetModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (name: string) => void;
-  initialName?: string;
-  mode?: ModalMode;
-}
-
-export const EditPresetModal = observer(({
-  isOpen,
-  onClose,
-  onSubmit,
-  initialName = '',
-  mode = 'create' as ModalMode,
-}: EditPresetModalProps) => {
-  const [name, setName] = useState(initialName);
+export const EditPresetModal = observer(() => {
+  const [name, setName] = useState(() => modalStore.editingPreset?.name || '');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      setName(initialName);
+    if (modalStore.isEditPresetModalOpen) {
+      const preset = modalStore.editingPreset;
+      const mode = modalStore.presetModalMode;
+      setName(mode === 'edit' && preset ? preset.name : mode === 'clone' && preset ? `${preset.name} (copy)` : '');
       setError(null);
     }
-  }, [isOpen, initialName]);
+  }, [modalStore.isEditPresetModalOpen, modalStore.editingPreset?.name]);
 
-  const currentMode = mode ?? 'clone';
+  const currentMode = modalStore.presetModalMode;
   const title = currentMode === 'clone' ? 'Clone Preset' : currentMode === 'edit' ? 'Edit Preset' : 'New Preset';
   const submitLabel = currentMode === 'clone' ? 'Clone' : currentMode === 'edit' ? 'Save' : 'Create';
+
+  const handleClose = () => {
+    modalStore.closeEditPresetModal();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
       try {
-        onSubmit(name.trim());
+        if (currentMode === 'edit' && modalStore.editingPresetId) {
+          modalStore.updatePreset(name.trim(), modalStore.editingPreset?.mode || 'layout-grid');
+        } else if (currentMode === 'clone' && modalStore.editingPresetId) {
+          modalStore.addPreset(name.trim(), modalStore.editingPreset?.mode || 'layout-grid');
+        } else if (currentMode === 'create') {
+          modalStore.addPreset(name.trim(), 'layout-grid');
+        }
+        modalStore.closeEditPresetModal();
+        setName('');
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to clone preset');
+        setError(err instanceof Error ? err.message : 'Failed to submit preset');
       }
     }
   };
 
-  if (!isOpen) return null;
+  if (!modalStore.isEditPresetModalOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
@@ -51,7 +51,7 @@ export const EditPresetModal = observer(({
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
             aria-label="Close"
           >
@@ -84,7 +84,7 @@ export const EditPresetModal = observer(({
           <div className="flex justify-end gap-2">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
             >
               Cancel

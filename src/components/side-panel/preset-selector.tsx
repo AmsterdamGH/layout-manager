@@ -1,25 +1,13 @@
 import { useState, useEffect } from 'react';
+import { iframeLayoutStore, modalStore } from '@/stores';
 import { observer } from 'mobx-react-lite';
 import { Plus, ChevronDown, Upload } from 'lucide-react';
-import { iframeLayoutStore } from '@/stores';
 import { PresetActions } from './preset-actions';
 import { getPresetUrl } from '@/utils/hash';
 
-interface PresetSelectorProps {
-  onClone: (presetId: string) => void;
-  onEdit: (presetId: string) => void;
-  onCreate: () => void;
-  onImport: () => void;
-}
-
 const MAX_LISTBOX_PRESETS = 5;
 
-export const PresetSelector = observer(({
-  onClone,
-  onEdit,
-  onCreate,
-  onImport,
-}: PresetSelectorProps) => {
+export const PresetSelector = observer(() => {
   const [isOpen, setIsOpen] = useState(false);
   const presets = iframeLayoutStore.presetList;
   const currentPresetId = iframeLayoutStore.currentPresetId;
@@ -27,21 +15,24 @@ export const PresetSelector = observer(({
 
   const handleClonePreset = (presetId: string) => {
     if (presetId) {
-      onClone(presetId);
+      modalStore.openEditPresetModal('clone', presetId);
+    }
+  };
+
+  const handleEditPreset = (presetId: string) => {
+    if (presetId) {
+      modalStore.openEditPresetModal('edit', presetId);
     }
   };
 
   const handleCreatePreset = () => {
-    onCreate();
+    modalStore.openEditPresetModal('create');
     setIsOpen(false);
   };
 
   const handleDeletePreset = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('Delete this preset?')) {
-      iframeLayoutStore.deletePreset(id);
-      setIsOpen(false);
-    }
+    modalStore.openDeletePresetModal(id);
   };
 
   const handleSelect = (presetId: string) => {
@@ -98,7 +89,7 @@ export const PresetSelector = observer(({
           presetId={preset.id}
           presetName={preset.name}
           onClone={handleClonePreset}
-          onEdit={onEdit}
+          onEdit={handleEditPreset}
           onDelete={handleDeletePreset}
         />
       </div>
@@ -142,7 +133,7 @@ export const PresetSelector = observer(({
                 presetId={currentPreset.id}
                 presetName={currentPreset.name}
                 onClone={handleClonePreset}
-                onEdit={onEdit}
+                onEdit={handleEditPreset}
                 onDelete={handleDeletePreset}
               />
             )}
@@ -183,7 +174,7 @@ export const PresetSelector = observer(({
             New preset
           </button>
           <button
-            onClick={onImport}
+            onClick={() => modalStore.openImportPresetModal()}
             className="p-2 rounded-md transition-colors bg-gray-500 dark:bg-gray-700 text-white dark:text-gray-200 hover:bg-gray-600 dark:hover:bg-gray-600"
             aria-label="Import preset"
           >

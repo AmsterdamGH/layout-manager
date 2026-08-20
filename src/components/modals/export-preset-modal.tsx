@@ -1,20 +1,12 @@
 import { useState } from 'react';
+import { iframeLayoutStore, modalStore } from '@/stores';
 import { observer } from 'mobx-react-lite';
 import { X, Copy, Check, Download } from 'lucide-react';
-import { iframeLayoutStore } from '@/stores';
 
-interface ExportPresetModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export const ExportPresetModal = observer(({
-  isOpen,
-  onClose,
-}: ExportPresetModalProps) => {
+export const ExportPresetModal = observer(() => {
   const [copied, setCopied] = useState(false);
 
-  if (!isOpen) return null;
+  if (!modalStore.isExportPresetModalOpen) return null;
 
   const handleCopy = async () => {
     try {
@@ -38,13 +30,17 @@ export const ExportPresetModal = observer(({
     iframeLayoutStore.downloadPreset();
   };
 
+  const handleClose = () => {
+    modalStore.closeExportPresetModal();
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl m-4 max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Export Preset</h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
             aria-label="Close"
           >
@@ -67,7 +63,7 @@ export const ExportPresetModal = observer(({
         <div className="flex justify-end gap-2 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
           >
             Cancel

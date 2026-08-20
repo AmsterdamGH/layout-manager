@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
+import { iframeLayoutStore, modalStore } from '@/stores';
 import { Plus, Eye, EyeOff } from 'lucide-react';
-import { iframeLayoutStore } from '@/stores';
 
 export const IFrameList = observer(() => {
   const orderedIframes = iframeLayoutStore.orderedIframes;
@@ -16,7 +16,7 @@ export const IFrameList = observer(() => {
             <div className="flex items-center gap-1">
               <button
                 className="flex-1 text-left px-2 py-1.5 text-sm rounded-md transition-colors bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 truncate"
-                onClick={() => iframeLayoutStore.editIframe(iframe.id)}
+                onClick={() => modalStore.openEditIframeModal('edit', iframe.id)}
                 aria-label={`Edit ${iframe.title}`}
               >
                 {iframe.title || iframe.url}
@@ -37,7 +37,7 @@ export const IFrameList = observer(() => {
         ))}
         <li>
           <button
-            onClick={() => iframeLayoutStore.openAddIframeModal()}
+            onClick={() => modalStore.openEditIframeModal('create')}
             className="w-full px-2 py-1.5 text-sm rounded-md transition-colors bg-gray-500 dark:bg-gray-700 text-white dark:text-gray-200 hover:bg-gray-600 dark:hover:bg-gray-600 flex items-center justify-center gap-2"
             aria-label="Add page"
           >

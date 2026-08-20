@@ -1,8 +1,9 @@
 import { makeAutoObservable } from 'mobx';
-import type { Layout, Preset, AppMode, ModalMode } from '@/types/layout';
+import type { Layout, Preset, AppMode } from '@/types/layout';
 import type { Iframe } from '@/types/iframe';
 import { loadFromStorage, saveToStorage, clearStorage } from '@/utils/storage';
 import { getHashPreset, setHashPreset, removeHashPreset } from '@/utils/hash';
+import { modalStore } from './modal-store';
 
 class IframeLayoutStore {
   preset: Preset = {
@@ -20,13 +21,8 @@ class IframeLayoutStore {
   presets: Map<string, Preset> = new Map();
   isLoading: boolean = false;
   error: string | null = null;
-  editingIframeId: string | null = null;
+
   isSidePanelOpen: boolean = false;
-  isAddIframeModalOpen: boolean = false;
-  isExportModalOpen: boolean = false;
-  isEditPresetModalOpen: boolean = false;
-  isImportPresetModalOpen: boolean = false;
-  modalMode: ModalMode = 'create';
   draggedIframeId: string | null = null;
   dragOverIframeId: string | null = null;
 
@@ -62,14 +58,14 @@ class IframeLayoutStore {
     return name;
   }
 
-  private savePresets(): void {
+  savePresets = (): void => {
     try {
       const presets = Array.from(this.presets.values());
       localStorage.setItem('presets', JSON.stringify(presets));
     } catch (err) {
       console.error('Failed to save presets:', err);
     }
-  }
+  };
 
   private initializeFromHash(): void {
     const presetName = getHashPreset();
@@ -273,49 +269,11 @@ class IframeLayoutStore {
   };
 
   closeSidePanel = (): void => {
-    if (this.isAnyModalOpen) return;
     this.isSidePanelOpen = false;
   };
 
-  openAddIframeModal = (): void => {
-    this.editingIframeId = null;
-    this.isAddIframeModalOpen = true;
-    this.modalMode = 'create';
-  };
+  // Iframe modal actions
 
-  editIframe = (id: string): void => {
-    this.editingIframeId = id;
-  };
-
-  closeEditModal = (): void => {
-    this.editingIframeId = null;
-    this.modalMode = 'create';
-    this.isAddIframeModalOpen = false;
-  };
-
-  openEditPresetModal = (): void => {
-    this.isEditPresetModalOpen = true;
-  };
-
-  closeEditPresetModal = (): void => {
-    this.isEditPresetModalOpen = false;
-  };
-
-  openImportPresetModal = (): void => {
-    this.isImportPresetModalOpen = true;
-  };
-
-  closeImportPresetModal = (): void => {
-    this.isImportPresetModalOpen = false;
-  };
-
-  openExportModal = (): void => {
-    this.isExportModalOpen = true;
-  };
-
-  closeExportModal = (): void => {
-    this.isExportModalOpen = false;
-  };
 
   // Drag and drop actions
   startDrag = (id: string): void => {
@@ -454,6 +412,10 @@ class IframeLayoutStore {
       .filter((iframe): iframe is Iframe => iframe !== undefined);
   }
 
+  getIFrameById(id: string): Iframe | undefined {
+    return this.layout.preset.iframes.find((i) => i.id === id);
+  }
+
   get currentMode(): Preset['mode'] {
     return this.layout.preset.mode;
   }
@@ -479,27 +441,15 @@ class IframeLayoutStore {
   }
 
   get addIframeModalOpen(): boolean {
-    return this.isAddIframeModalOpen || this.editingIframeId !== null;
-  }
-
-  get exportModalOpen(): boolean {
-    return this.isExportModalOpen;
-  }
-
-  get importPresetModalOpen(): boolean {
-    return this.isImportPresetModalOpen;
+    return modalStore.editIframeModalOpen;
   }
 
   get isAnyModalOpen(): boolean {
-    return this.isAddIframeModalOpen || this.editingIframeId !== null || this.isExportModalOpen || this.isEditPresetModalOpen || this.isImportPresetModalOpen;
+    return modalStore.isAnyModalOpen;
   }
 
   get exportedJson(): string {
     return this.exportPreset();
-  }
-
-  get currentModalMode(): ModalMode {
-    return this.modalMode;
   }
 }
 

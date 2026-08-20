@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
+import { iframeLayoutStore, modalStore } from '@/stores';
 import { observer } from 'mobx-react-lite';
 import { X, Upload, Code, Loader2 } from 'lucide-react';
-import { iframeLayoutStore } from '@/stores';
 import { validatePreset } from '@/utils/validate-preset';
 
 type ImportMode = 'text' | 'file';
@@ -31,7 +31,7 @@ export const ImportPresetModal = observer(() => {
 
       const name = parsed.name ?? `Imported-${Date.now()}`;
       iframeLayoutStore.createPreset(name, parsed);
-      iframeLayoutStore.closeImportPresetModal();
+      modalStore.closeImportPresetModal();
       setJsonInput('');
       setError(null);
     } catch (err) {
@@ -62,7 +62,7 @@ export const ImportPresetModal = observer(() => {
 
         const name = parsed.name ?? `Imported-${Date.now()}`;
         iframeLayoutStore.createPreset(name, parsed);
-        iframeLayoutStore.closeImportPresetModal();
+        modalStore.closeImportPresetModal();
         setError(null);
       } catch (err) {
         setError('Invalid JSON file format or import failed');
@@ -88,14 +88,14 @@ export const ImportPresetModal = observer(() => {
     }
   }, [handleTextImport]);
 
-  if (!iframeLayoutStore.importPresetModalOpen) return null;
+  if (!modalStore.importPresetModalOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 dark:bg-black/70"
-        onClick={() => iframeLayoutStore.closeImportPresetModal()}
+        onClick={() => modalStore.closeImportPresetModal()}
         aria-hidden="true"
       />
 
@@ -111,7 +111,7 @@ export const ImportPresetModal = observer(() => {
             Import Preset
           </h2>
           <button
-            onClick={() => iframeLayoutStore.closeImportPresetModal()}
+            onClick={() => modalStore.closeImportPresetModal()}
             className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
             aria-label="Close dialog"
           >
@@ -224,7 +224,7 @@ export const ImportPresetModal = observer(() => {
         {/* Footer */}
         <div className="flex justify-end gap-2 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
           <button
-            onClick={() => iframeLayoutStore.closeImportPresetModal()}
+            onClick={() => modalStore.closeImportPresetModal()}
             className="px-4 py-2 text-sm font-medium rounded-md transition-colors bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600"
           >
             Cancel

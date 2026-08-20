@@ -1,27 +1,18 @@
 import { observer } from 'mobx-react-lite';
+import { iframeLayoutStore, modalStore } from '@/stores';
 import { Panel } from './panel';
 import { AddIframeButton } from '../side-panel/add-iframe-button';
-import { iframeLayoutStore } from '@/stores';
-import type { AppMode } from '@/types/layout';
 
 export const GridLayout = observer(() => {
   const orderedIframes = iframeLayoutStore.orderedIframes;
   const count = orderedIframes.length;
-  const appMode: AppMode = iframeLayoutStore.appMode;
-  const isEditMode = appMode === 'edit';
-
-  const handleEdit = (id: string) => {
-    iframeLayoutStore.editIframe(id);
-  };
-
-  const handleDelete = (id: string) => {
-    iframeLayoutStore.removeIframe(id);
-  };
 
   if (count === 0) {
     return (
       <div className="flex items-center justify-center h-full">
-        <AddIframeButton onClick={() => iframeLayoutStore.openAddIframeModal()} />
+        <AddIframeButton onClick={() => {
+          modalStore.openEditIframeModal('create');
+        }} />
       </div>
     );
   }
@@ -47,9 +38,6 @@ export const GridLayout = observer(() => {
           key={iframe.id}
           iframe={iframe}
           className="h-full"
-          isEditMode={isEditMode}
-          onEdit={isEditMode ? handleEdit : undefined}
-          onDelete={isEditMode ? handleDelete : undefined}
         />
       ))}
     </div>

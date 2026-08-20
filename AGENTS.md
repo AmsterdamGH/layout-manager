@@ -188,7 +188,10 @@ src/
 - Accounts for tooltip size and transform when calculating position
 - Arrow indicator points towards the trigger element
 
-### 11. Header Visibility Toggle
+### 11. Modal Store Architecture
+- Modal store (`src/stores/modal-store.ts`) manages all modal UI state
+
+### 12. Header Visibility Toggle
 - Toggle button in panel header to show/hide header in edit mode
 - Header is always visible in edit mode (regardless of `headerVisible` property)
 - Uses `RectangleHorizontal` icon to hide header, `CreditCard` to show header
@@ -259,23 +262,15 @@ class IframeLayoutStore {
   presets: Map<string, Preset> = new Map();
   isLoading: boolean = false;
   error: string | null = null;
-  editingIframeId: string | null = null;
   draggedIframeId: string | null = null;
   dragOverIframeId: string | null = null;
-  isAddIframeModalOpen: boolean = false;
-  isExportModalOpen: boolean = false;
-  isEditPresetModalOpen: boolean = false;
-  isImportPresetModalOpen: boolean = false;
-  modalMode: ModalMode = 'create';
+  isSidePanelOpen: boolean = false;
   
   // Actions
   @action addIframe(iframe: Iframe): void;
   @action removeIframe(id: string): void;
   @action updateIframe(id: string, updates: Partial<Iframe>): void;
   @action switchLayout(mode: Preset['mode']): void;
-  @action reorderIframes(order: string[]): void;
-  @action editIframe(id: string): void;
-  @action closeEditModal(): void;
   @action startDrag(id: string): void;
   @action dragOver(id: string): void;
   @action drop(targetId: string): void;
@@ -288,22 +283,19 @@ class IframeLayoutStore {
   @action deletePreset(presetId: string): void;
   @action clonePreset(sourceId: string, newName: string): string;
   @action editPresetName(presetId: string, newName: string): void;
-  @action openAddIframeModal(): void;
-  @action openEditModal(id: string): void;
   @action toggleAppMode(): void;
-  @action toggleSidePanel(): void;
   @action openSidePanel(): void;
   @action closeSidePanel(): void;
   @action exportPreset(): string;
   @action downloadPreset(): void;
-  @action openExportModal(): void;
-  @action closeExportModal(): void;
-  @action openEditPresetModal(): void;
-  @action closeEditPresetModal(): void;
-  @action openImportPresetModal(): void;
-  @action closeImportPresetModal(): void;
   @action toggleVisibility(id: string): void;
   @action toggleHeaderVisibility(id: string): void;
+  @action savePresets(): void;
+  
+  // Getters
+  get orderedIframes(): Iframe[];
+  get iframeById(): Map<string, Iframe>;
+  getIFrameById(id: string): Iframe | undefined;
   
   // Private methods
   private deduplicatePresetName(name: string): string;
@@ -319,6 +311,47 @@ class IframeStore {
   @action updateIframe(id: string, updates: Partial<Iframe>): void;
   @action removeIframe(id: string): void;
   @action toggleVisibility(id: string): void;
+}
+```
+
+### modal-store
+```typescript
+class ModalStore {
+  isEditIframeModalOpen: boolean = false;
+  isExportPresetModalOpen: boolean = false;
+  isEditPresetModalOpen: boolean = false;
+  isImportPresetModalOpen: boolean = false;
+  isDeletePresetModalOpen: boolean = false;
+  iframeModalMode: ModalMode = 'create';
+  presetModalMode: ModalMode = 'create';
+  editingIframeId: string | null = null;
+  editingPresetId: string | null = null;
+  deletePresetId: string | null = null;
+  
+  // Actions
+  @action openEditIframeModal(mode: 'create' | 'edit', id?: string): void;
+  @action closeEditIframeModal(): void;
+  @action openEditPresetModal(mode: ModalMode, presetId?: string): void;
+  @action closeEditPresetModal(): void;
+  @action openDeletePresetModal(presetId: string): void;
+  @action closeDeletePresetModal(): void;
+  @action closeAllModals(): void;
+  @action updateIframe(url: string, title: string): void;
+  @action addIframe(url: string, title: string): void;
+  @action updatePreset(name: string, mode: Preset['mode']): void;
+  @action addPreset(name: string, mode: Preset['mode']): void;
+  
+  // Getters
+  get editingIframe(): Iframe | null;
+  get editingPreset(): Preset | null;
+  
+  // Computed properties
+  get isAnyModalOpen(): boolean;
+  get editIframeModalOpen(): boolean;
+  get exportPresetModalOpen(): boolean;
+  get importPresetModalOpen(): boolean;
+  get deletePresetModalOpen(): boolean;
+  get currentModalMode(): ModalMode;
 }
 ```
 

@@ -1,15 +1,11 @@
-import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import { iframeLayoutStore, modalStore } from '@/stores';
 import { Pencil, Save, Sun, Moon, Download } from 'lucide-react';
 import { LayoutSwitcher } from '../layout/layout-switcher';
-import { EditPresetModal } from '../modals/edit-preset-modal';
-import { ExportPresetModal } from '../modals/export-preset-modal';
-import { ImportPresetModal } from '../modals/import-preset-modal';
 import { PresetSelector } from './preset-selector';
 import { IFrameList } from './iframe-list';
-import { iframeLayoutStore } from '@/stores';
 import { useTheme } from '@/providers/theme-provider';
-import type { LayoutMode, AppMode, ModalMode } from '@/types/layout';
+import type { LayoutMode, AppMode } from '@/types/layout';
 
 interface SidePanelProps {
   isOpen: boolean;
@@ -24,42 +20,8 @@ export const SidePanel = observer(({
   currentMode,
   onModeChange,
 }: SidePanelProps) => {
-  const [editPresetName, setEditPresetName] = useState('');
-  const [modalMode, setModalMode] = useState<ModalMode>('create');
   const appMode: AppMode = iframeLayoutStore.appMode;
   const { theme, toggleTheme } = useTheme();
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (isOpen) {
-          onClose();
-        } else {
-          iframeLayoutStore.openSidePanel();
-        }
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  const handleEditSubmit = (name: string) => {
-    if (name.trim()) {
-      if (modalMode === 'edit' && iframeLayoutStore.currentPresetId) {
-        iframeLayoutStore.editPresetName(iframeLayoutStore.currentPresetId!, name.trim());
-      } else if (modalMode === 'clone' && iframeLayoutStore.currentPresetId) {
-        iframeLayoutStore.clonePreset(iframeLayoutStore.currentPresetId!, name.trim());
-      } else if (modalMode === 'create') {
-        iframeLayoutStore.createPreset(name.trim(), {
-          mode: 'layout-grid',
-          iframes: [],
-          order: [],
-        });
-      }
-      iframeLayoutStore.closeEditPresetModal();
-      setEditPresetName('');
-    }
-  };
 
   return (
     <>
@@ -92,28 +54,7 @@ export const SidePanel = observer(({
         {/* Content */}
         <div className="p-4 space-y-4 text-gray-900 dark:text-gray-100">
           {/* Presets */}
-          <PresetSelector
-            onClone={(presetId) => {
-              if (presetId) {
-                const preset = iframeLayoutStore.presetList.find((p) => p.id === presetId);
-                setEditPresetName(preset ? `${preset.name} (copy)` : 'Preset (copy)');
-                setModalMode('clone');
-                iframeLayoutStore.openEditPresetModal();
-              }
-            }}
-            onEdit={(presetId) => {
-              const preset = iframeLayoutStore.presetList.find((p) => p.id === presetId);
-              setEditPresetName(preset?.name || '');
-              setModalMode('edit');
-              iframeLayoutStore.openEditPresetModal();
-            }}
-            onCreate={() => {
-              setEditPresetName('');
-              setModalMode('create');
-              iframeLayoutStore.openEditPresetModal();
-            }}
-            onImport={() => iframeLayoutStore.openImportPresetModal()}
-          />
+          <PresetSelector />
 
           {/* Layout Mode */}
           <div className="space-y-2">
@@ -126,7 +67,7 @@ export const SidePanel = observer(({
             />
           </div>
 
-          {/* IFrame List */}
+          {/* Page List */}
           <IFrameList />
         </div>
 
@@ -143,7 +84,7 @@ export const SidePanel = observer(({
             </button>
             {/* Export Preset */}
             <button
-              onClick={() => iframeLayoutStore.openExportModal()}
+              onClick={() => modalStore.openExportPresetModal()}
               className="flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-gray-500 dark:bg-gray-700 text-white dark:text-gray-100 hover:bg-gray-600 dark:hover:bg-gray-600 flex items-center justify-center"
               aria-label="Export preset as JSON"
             >
@@ -152,18 +93,6 @@ export const SidePanel = observer(({
           </div>
         </div>
       </aside>
-      <EditPresetModal
-        isOpen={iframeLayoutStore.isEditPresetModalOpen}
-        onClose={iframeLayoutStore.closeEditPresetModal}
-        onSubmit={handleEditSubmit}
-        initialName={editPresetName}
-        mode={modalMode}
-      />
-      <ExportPresetModal
-        isOpen={iframeLayoutStore.exportModalOpen}
-        onClose={iframeLayoutStore.closeExportModal}
-      />
-      <ImportPresetModal />
     </>
   );
 });
