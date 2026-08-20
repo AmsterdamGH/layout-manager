@@ -170,7 +170,7 @@ src/
 - Duplicate preset names handled automatically with `-{timestamp}` suffix
 
 ### 9. Side Panel Behavior
-- Panel auto-closes after 500ms when not hovering
+- Panel opens/closes via ESC key toggle
 - Panel stays open when any modal is active (iframe edit, export, preset edit, or import)
 - Preset dropdown closes when clicking outside or when panel closes
 - **Add page button:** Has text caption "Add Page" next to Plus icon
@@ -251,9 +251,6 @@ class IframeLayoutStore {
   isEditPresetModalOpen: boolean = false;
   isImportPresetModalOpen: boolean = false;
   modalMode: ModalMode = 'create';
-  isHoveringLeftEdge: boolean = false;
-  hoverTimeout: ReturnType<typeof setTimeout> | null = null;
-  openTimeout: ReturnType<typeof setTimeout> | null = null;
   
   // Actions
   @action addIframe(iframe: Iframe): void;
@@ -281,8 +278,6 @@ class IframeLayoutStore {
   @action toggleSidePanel(): void;
   @action openSidePanel(): void;
   @action closeSidePanel(): void;
-  @action openSidePanelDelayed(): void;
-  @action setHoveringLeftEdge(isHovering: boolean): void;
   @action exportPreset(): string;
   @action downloadPreset(): void;
   @action openExportModal(): void;

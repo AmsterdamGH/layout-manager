@@ -70,7 +70,7 @@ export const Panel = observer(({ iframe, className = '', isEditMode = true, onEd
       aria-label={iframe.title || 'Iframe panel'}
     >
       <PanelHeader iframe={iframe} isEditMode={isEditMode} onEdit={onEdit} onDelete={onDelete} />
-      <div className={`${isEditMode ? 'pt-8' : ''} h-full`}>
+      <div className="pt-8 h-full">
         {isLoading && <Loading size="sm" text="Loading..." />}
         {hasError && (
           <div className="flex items-center justify-center h-full text-red-500">
@@ -84,7 +84,7 @@ export const Panel = observer(({ iframe, className = '', isEditMode = true, onEd
           onLoad={handleLoad}
           onError={handleError}
           className="w-full h-full border-0"
-          style={isEditMode ? { pointerEvents: 'none' } : undefined}
+          style={{ pointerEvents: isEditMode ? 'none' : 'auto' }}
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
           loading="lazy"
         />

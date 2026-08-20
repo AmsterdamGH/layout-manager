@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 
-import { HoverZone } from './components/hover-zone';
 import { SidePanel } from './components/side-panel/side-panel';
 import { GridLayout } from './components/layout/grid-layout';
 import { SplitLayout } from './components/layout/split-layout';
@@ -44,7 +43,6 @@ export const App = observer(() => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
-      <HoverZone />
       <SidePanel
         isOpen={iframeLayoutStore.sidePanelOpen}
         onClose={() => iframeLayoutStore.closeSidePanel()}

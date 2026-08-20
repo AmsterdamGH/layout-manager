@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Pencil, Save, Sun, Moon, Download } from 'lucide-react';
 import { LayoutSwitcher } from '../layout/layout-switcher';
@@ -29,13 +29,19 @@ export const SidePanel = observer(({
   const appMode: AppMode = iframeLayoutStore.appMode;
   const { theme, toggleTheme } = useTheme();
 
-  const handlePanelMouseEnter = () => {
-    iframeLayoutStore.setHoveringLeftEdge(true);
-  };
-
-  const handlePanelMouseLeave = () => {
-    iframeLayoutStore.setHoveringLeftEdge(false);
-  };
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isOpen) {
+          onClose();
+        } else {
+          iframeLayoutStore.openSidePanel();
+        }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const handleEditSubmit = (name: string) => {
     if (name.trim()) {
@@ -66,8 +72,6 @@ export const SidePanel = observer(({
 
       {/* Side Panel */}
       <aside
-        onMouseEnter={handlePanelMouseEnter}
-        onMouseLeave={handlePanelMouseLeave}
         className={`fixed top-0 left-0 bottom-0 w-72 bg-white dark:bg-gray-800 shadow-xl z-50 transition-transform duration-300 ease-in-out ${isOpen ? 'transform-translate-x-0' : 'transform-translate-x--full'}`}
         role="dialog"
         aria-label="Navigation"
