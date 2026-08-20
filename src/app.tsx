@@ -31,6 +31,7 @@ export const App = observer(() => {
         url,
         title,
         isVisible: true,
+        headerVisible: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });

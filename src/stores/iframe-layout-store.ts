@@ -172,6 +172,15 @@ class IframeLayoutStore {
     }
   };
 
+  toggleHeaderVisibility = (id: string): void => {
+    const iframe = this.layout.preset.iframes.find((i) => i.id === id);
+    if (iframe) {
+      iframe.headerVisible = !iframe.headerVisible;
+      this.syncPreset();
+      this.saveToStorage();
+    }
+  };
+
   switchLayout = (mode: Preset['mode']): void => {
     this.layout.preset.mode = mode;
     this.preset.mode = mode;
@@ -366,6 +375,13 @@ class IframeLayoutStore {
         this.layout.appMode = data.appMode;
         this.layout.preset = this.preset;
         this.layout.presetId = data.presetId;
+        // Migrate existing iframes to have headerVisible property
+        this.layout.preset.iframes.forEach((iframe) => {
+          if (typeof iframe.headerVisible !== 'boolean') {
+            iframe.headerVisible = true;
+          }
+        });
+        this.syncPreset();
         // Ensure hash reflects current preset after loading
         if (this.layout.presetId && !getHashPreset()) {
           setHashPreset(this.preset.name);

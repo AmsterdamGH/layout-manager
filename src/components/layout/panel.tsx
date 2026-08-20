@@ -69,8 +69,8 @@ export const Panel = observer(({ iframe, className = '', isEditMode = true, onEd
       role="region"
       aria-label={iframe.title || 'Iframe panel'}
     >
-      <PanelHeader iframe={iframe} isEditMode={isEditMode} onEdit={onEdit} onDelete={onDelete} />
-      <div className="pt-8 h-full">
+      {(isEditMode || iframe.headerVisible) && <PanelHeader iframe={iframe} isEditMode={isEditMode} onEdit={onEdit} onDelete={onDelete} />}
+      <div className={`h-full ${isEditMode || iframe.headerVisible ? 'pt-8' : ''}`}>
         {isLoading && <Loading size="sm" text="Loading..." />}
         {hasError && (
           <div className="flex items-center justify-center h-full text-red-500">

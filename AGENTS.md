@@ -71,7 +71,8 @@ src/
 │   └── ui/
 │       ├── button.tsx
 │       ├── input.tsx
-│       └── loading.tsx
+│       ├── loading.tsx
+│       └── tooltip.tsx
 ├── stores/
 │   ├── iframe-layout-store.ts
 │   ├── iframe-store.ts
@@ -103,6 +104,7 @@ src/
 - Edit iframe URLs and titles
 - Remove iframes
 - Toggle iframe visibility (via Eye/EyeOff button in panel header and iframe list)
+- Toggle header visibility in edit mode (via RectangleHorizontal/CreditCard button in panel header)
 - Load iframe with loading/error states
 - Unified modal for adding and editing iframes (EditIframeModal)
 - IFrameList component in side panel for managing iframes (shows all iframes, including hidden ones)
@@ -179,6 +181,19 @@ src/
 - **IFrame list:** Displays all iframes (including hidden ones) with visibility toggle button on each item
 - **Panel header:** Visible in both view and edit modes; shows grip icon and action buttons only in edit mode
 
+### 10. Tooltip Component
+- Reusable tooltip component (`src/components/ui/tooltip.tsx`) using `createPortal`
+- Intelligent positioning algorithm that tries sides in clockwise order (top → right → bottom → left)
+- Automatically selects the first side where the tooltip fits within the viewport
+- Accounts for tooltip size and transform when calculating position
+- Arrow indicator points towards the trigger element
+
+### 11. Header Visibility Toggle
+- Toggle button in panel header to show/hide header in edit mode
+- Header is always visible in edit mode (regardless of `headerVisible` property)
+- Uses `RectangleHorizontal` icon to hide header, `CreditCard` to show header
+- `headerVisible` property added to `Iframe` interface with migration for existing iframes
+
 ## Icons
 
 The application uses Lucide React icons for consistent iconography:
@@ -192,7 +207,7 @@ The application uses Lucide React icons for consistent iconography:
 | `Pencil`, `Save` | Edit mode toggle |
 | `X` | Close buttons |
 | `Loader2` | Loading states |
-| `Grip`, `Pencil`, `Trash2`, `Eye`, `EyeOff` | Panel header actions |
+| `Grip`, `Pencil`, `Trash2`, `Eye`, `EyeOff`, `RectangleHorizontal`, `CreditCard` | Panel header actions |
 | `Copy` | Clone preset button |
 | `ChevronDown` | Dropdown toggle |
 | `Sun`, `Moon` | Theme toggle (side panel header) |
@@ -208,6 +223,7 @@ interface Iframe {
   url: string;
   title: string;
   isVisible: boolean;
+  headerVisible: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -287,6 +303,7 @@ class IframeLayoutStore {
   @action openImportPresetModal(): void;
   @action closeImportPresetModal(): void;
   @action toggleVisibility(id: string): void;
+  @action toggleHeaderVisibility(id: string): void;
   
   // Private methods
   private deduplicatePresetName(name: string): string;
