@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1f2937"/>
+      <stop offset="100%" style="stop-color:#111827"/>
+    </linearGradient>
+    <linearGradient id="blue1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#2563eb"/>
+    </linearGradient>
+    <linearGradient id="blue2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#60a5fa"/>
+      <stop offset="100%" style="stop-color:#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="blue3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#93c5fd"/>
+      <stop offset="100%" style="stop-color:#60a5fa"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="200" fill="url(#bg)"/>
+  
+  <!-- Top-left panel -->
+  <rect x="128" y="128" width="360" height="360" rx="40" fill="url(#blue1)"/>
+  
+  <!-- Top-right panel -->
+  <rect x="536" y="128" width="360" height="360" rx="40" fill="url(#blue2)"/>
+  
+  <!-- Bottom-left panel -->
+  <rect x="128" y="536" width="360" height="360" rx="40" fill="url(#blue3)"/>
+  
+  <!-- Bottom-right panel -->
+  <rect x="536" y="536" width="360" height="360" rx="40" fill="url(#bg)"/>
+</svg>
